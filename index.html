@@ -503,11 +503,10 @@ async function doSearch() {
 async function fetchRakutenJSONP(author) {
   const params = new URLSearchParams({
     applicationId: APP_ID,
-    affiliateId:   AFFILIATE_ID,
     author:        author,
     hits:          30,
-    formatVersion: 2,
   });
+  if (AFFILIATE_ID) params.set('affiliateId', AFFILIATE_ID);
   const url = `https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?${params}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('API取得失敗: ' + res.status);
