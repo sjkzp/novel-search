@@ -498,53 +498,31 @@ async function doSearch() {
 }
 
 // ─────────────────────────────────────────
-//  楽天ブックスAPI（JSONP・サーバー不要）
+//  楽天ブックスAPI（fetch）
 // ─────────────────────────────────────────
-function fetchRakutenJSONP(author) {
-  return new Promise((resolve, reject) => {
-    const cbName = '_rakuten_cb_' + Date.now();
-    const timeout = setTimeout(() => {
-      cleanup();
-      reject(new Error('タイムアウト：楽天APIから応答がありません'));
-    }, 10000);
-
-    function cleanup() {
-      delete window[cbName];
-      const el = document.getElementById(cbName);
-      if (el) el.remove();
-    }
-
-    window[cbName] = function(data) {
-      clearTimeout(timeout);
-      cleanup();
-      if (data.error) { reject(new Error(data.error)); return; }
-      const books = (data.Items || []).map(item => ({
-        title:         item.title,
-        author:        item.author,
-        publisher:     item.publisherName,
-        publishedDate: item.salesDate,
-        price:         item.itemPrice,
-        synopsis:      item.itemCaption || '（あらすじ未登録）',
-        url:           item.affiliateUrl || item.itemUrl,
-        image:         item.largeImageUrl || item.mediumImageUrl || '',
-      }));
-      resolve(books);
-    };
-
-    const params = new URLSearchParams({
-      applicationId: APP_ID,
-      affiliateId:   AFFILIATE_ID,
-      author:        author,
-      hits:          30,
-      formatVersion: 2,
-      callBack:      cbName,
-    });
-    const script = document.createElement('script');
-    script.id  = cbName;
-    script.src = `https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?${params}`;
-    script.onerror = () => { clearTimeout(timeout); cleanup(); reject(new Error('スクリプト読み込みエラー')); };
-    document.head.appendChild(script);
+async function fetchRakutenJSONP(author) {
+  const params = new URLSearchParams({
+    applicationId: APP_ID,
+    affiliateId:   AFFILIATE_ID,
+    author:        author,
+    hits:          30,
+    formatVersion: 2,
   });
+  const url = `https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?${params}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('API取得失敗: ' + res.status);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error + ': ' + (data.error_description || ''));
+  return (data.Items || []).map(item => ({
+    title:         item.title,
+    author:        item.author,
+    publisher:     item.publisherName,
+    publishedDate: item.salesDate,
+    price:         item.itemPrice,
+    synopsis:      item.itemCaption || '（あらすじ未登録）',
+    url:           item.affiliateUrl || item.itemUrl,
+    image:         item.largeImageUrl || item.mediumImageUrl || '',
+  }));
 }
 
 // ─────────────────────────────────────────
