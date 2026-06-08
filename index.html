@@ -371,7 +371,7 @@
   </div>
 </main>
 
-<footer class="site-version">ver.1</footer>
+<footer class="site-version">ver.2</footer>
 
 <script>
 // Rakuten Web ServiceのapplicationIdとaccessKeyを入れると実データ検索になります。
@@ -462,7 +462,7 @@ async function doSearch() {
   searchBtn.disabled = true;
 
   try {
-    const books = APP_ID && ACCESS_KEY ? await fetchRakutenJSONP(author) : getDemoData(author);
+    const books = APP_ID && ACCESS_KEY ? await fetchRakuten(author) : getDemoData(author);
     render(author, books);
   } catch (error) {
     showError(error.message || "検索に失敗しました。");
@@ -471,71 +471,72 @@ async function doSearch() {
   }
 }
 
-function fetchRakutenJSONP(author) {
-  return new Promise((resolve, reject) => {
-    const callbackName = `rakutenBooksCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const params = new URLSearchParams({
-      applicationId: APP_ID,
-      accessKey: ACCESS_KEY,
-      author,
-      booksGenreId: "001004",
-      hits: "30",
-      format: "json",
-      callback: callbackName
-    });
-
-    if (AFFILIATE_ID) params.set("affiliateId", AFFILIATE_ID);
-
-    const script = document.createElement("script");
-    const timeoutId = window.setTimeout(() => {
-      cleanup();
-      reject(new Error("APIの応答がありませんでした。時間をおいて再検索してください。"));
-    }, 12000);
-
-    window[callbackName] = data => {
-      cleanup();
-      if (data.error) {
-        const description = data.error_description || "";
-        if (data.error === "wrong_parameter" && description.includes("applicationId")) {
-          reject(new Error("楽天APIのapplicationIdが無効です。楽天Webサービスで取得した有効なapplicationIdをAPP_IDに設定してください。"));
-          return;
-        }
-
-        if (data.error === "wrong_parameter" && description.includes("accessKey")) {
-          reject(new Error("楽天APIのaccessKeyが無効です。楽天Webサービスで取得した有効なaccessKeyをACCESS_KEYに設定してください。"));
-          return;
-        }
-
-        reject(new Error(`${data.error}: ${description}`));
-        return;
-      }
-
-      resolve((data.Items || []).map(({ Item }) => ({
-        title: Item.title,
-        author: Item.author,
-        publisher: Item.publisherName,
-        publishedDate: Item.salesDate,
-        price: Item.itemPrice,
-        synopsis: Item.itemCaption || "あらすじは登録されていません。",
-        url: Item.affiliateUrl || Item.itemUrl,
-        image: Item.largeImageUrl || Item.mediumImageUrl || ""
-      })));
-    };
-
-    script.onerror = () => {
-      cleanup();
-      reject(new Error("APIの読み込みに失敗しました。ネットワーク接続を確認してください。"));
-    };
-
-    function cleanup() {
-      window.clearTimeout(timeoutId);
-      delete window[callbackName];
-      script.remove();
-    }
-
-    script.src = `https://openapi.rakuten.co.jp/services/api/BooksBook/Search/20170404?${params.toString()}`;
-    document.body.appendChild(script);
+async function fetchRakuten(author) {
+  const params = new URLSearchParams({
+    applicationId: APP_ID,
+    accessKey: ACCESS_KEY,
+    author,
+    booksGenreId: "001004",
+    hits: "30",
+    format: "json"
   });
+
+  if (AFFILIATE_ID) params.set("affiliateId", AFFILIATE_ID);
+
+  let response;
+  try {
+    response = await fetch(`https://openapi.rakuten.co.jp/services/api/BooksBook/Search/20170404?${params.toString()}`, {
+      method: "GET",
+      mode: "cors",
+      referrerPolicy: "strict-origin-when-cross-origin"
+    });
+  } catch (error) {
+    throw new Error("楽天APIに接続できませんでした。アップロード先のURLを楽天Webサービスのアプリ設定で許可済みWebサイトに登録してください。file://で直接開いている場合は実API検索できません。");
+  }
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const apiError = data?.errors?.errorMessage || data?.error_description || response.statusText;
+    throw new Error(formatRakutenError(apiError));
+  }
+
+  if (data?.error || data?.errors) {
+    const apiError = data.error_description || data.errors?.errorMessage || data.error;
+    throw new Error(formatRakutenError(apiError));
+  }
+
+  return (data.Items || []).map(({ Item }) => ({
+    title: Item.title,
+    author: Item.author,
+    publisher: Item.publisherName,
+    publishedDate: Item.salesDate,
+    price: Item.itemPrice,
+    synopsis: Item.itemCaption || "あらすじは登録されていません。",
+    url: Item.affiliateUrl || Item.itemUrl,
+    image: Item.largeImageUrl || Item.mediumImageUrl || ""
+  }));
+}
+
+function formatRakutenError(message) {
+  const text = String(message || "");
+  if (text.includes("REQUEST_CONTEXT_BODY_HTTP_REFERRER_MISSING")) {
+    return "楽天APIが呼び出し元URLを確認できませんでした。file://ではなくアップロード先URLで開いてください。";
+  }
+
+  if (text.includes("HTTP_REFERRER_NOT_ALLOWED")) {
+    return "楽天APIでこのサイトURLが許可されていません。楽天Webサービスのアプリ設定で、アップロード先のドメインを許可済みWebサイトに追加してください。";
+  }
+
+  if (text.includes("applicationId")) {
+    return "楽天APIのapplicationIdが無効です。楽天Webサービスで取得した有効なapplicationIdをAPP_IDに設定してください。";
+  }
+
+  if (text.includes("accessKey")) {
+    return "楽天APIのaccessKeyが無効です。楽天Webサービスで取得した有効なaccessKeyをACCESS_KEYに設定してください。";
+  }
+
+  return text || "楽天APIの呼び出しに失敗しました。";
 }
 
 function getDemoData(author) {
