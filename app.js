@@ -57,6 +57,36 @@ const DEMO_DATA = {
   ]
 };
 
+const FEATURED_AUTHORS = [
+  "東野圭吾",
+  "村上春樹",
+  "宮部みゆき",
+  "辻村深月",
+  "湊かなえ",
+  "伊坂幸太郎",
+  "恩田陸",
+  "森見登美彦",
+  "有川ひろ",
+  "住野よる",
+  "ひのひまり",
+  "西尾維新"
+];
+
+const FEATURED_KEYWORDS = [
+  "青春",
+  "ミステリー",
+  "猫",
+  "家族",
+  "恋愛",
+  "復讐",
+  "学校",
+  "友情",
+  "旅",
+  "謎",
+  "魔法",
+  "探偵"
+];
+
 const searchMode = document.getElementById("searchMode");
 const searchInput = document.getElementById("searchInput");
 const searchBtn = document.getElementById("searchBtn");
@@ -116,6 +146,7 @@ pagination.addEventListener("click", event => {
 });
 
 updateSearchPlaceholder();
+setupQuickSearches();
 
 content.addEventListener("click", event => {
   const quickSearch = event.target.closest(".quick-search");
@@ -151,6 +182,34 @@ function updateSearchPlaceholder() {
   searchInput.placeholder = searchMode.value === "synopsis"
     ? "あらすじのキーワードを入力"
     : "作家名を入力";
+}
+
+function setupQuickSearches() {
+  const buttons = [...document.querySelectorAll(".quick-search")];
+  if (buttons.length === 0) return;
+
+  const items = [
+    ...pickRandomItems(FEATURED_AUTHORS, 2).map(query => ({ mode: "author", query })),
+    ...pickRandomItems(FEATURED_KEYWORDS, 2).map(query => ({ mode: "synopsis", query }))
+  ];
+
+  buttons.forEach((button, index) => {
+    const item = items[index];
+    if (!item) {
+      button.remove();
+      return;
+    }
+
+    button.dataset.mode = item.mode;
+    button.dataset.query = item.query;
+    button.textContent = item.query;
+  });
+}
+
+function pickRandomItems(items, count) {
+  return [...items]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, count);
 }
 
 function doSearch() {

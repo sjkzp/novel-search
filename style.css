@@ -205,10 +205,10 @@
   }
 
   .hero-copy h1 {
-    max-width: 11em;
+    max-width: 12em;
     font-family: "Zen Kaku Gothic New", sans-serif;
-    font-size: clamp(2.2rem, 6vw, 4.9rem);
-    line-height: 1.05;
+    font-size: clamp(2.15rem, 5.2vw, 4.35rem);
+    line-height: 1.12;
     letter-spacing: 0;
   }
 
@@ -273,8 +273,22 @@
   .tile-large {
     grid-row: span 2;
     min-height: 354px;
-    background: linear-gradient(150deg, #2a1f14 0%, #42321f 58%, #f7f0e4 59%);
+    background: linear-gradient(150deg, #2a1f14 0%, #3f2d1b 54%, #e6dac8 55%, #f7f0e4 100%);
     color: #fff;
+  }
+
+  .tile-large .tile-label,
+  .tile-large strong,
+  .tile-large small {
+    display: inline-block;
+    width: fit-content;
+    padding: 3px 7px;
+    border-radius: 4px;
+    background: rgba(26, 16, 8, 0.7);
+  }
+
+  .tile-large .tile-label {
+    background: rgba(26, 16, 8, 0.58);
   }
 
   .tile-red {
