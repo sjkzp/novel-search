@@ -56,11 +56,34 @@
 
   .logo span { color: var(--accent); }
 
+  .search-area {
+    display: flex;
+    flex: 1;
+    gap: 10px;
+    min-width: 280px;
+    flex-wrap: wrap;
+  }
+
   .search-row {
     display: flex;
     gap: 8px;
     flex: 1;
     min-width: 280px;
+  }
+
+  .search-group {
+    display: flex;
+    flex: 1;
+    min-width: 280px;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .search-label {
+    color: #d9cfc2;
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
   }
 
   .search-input {
@@ -204,6 +227,21 @@
     margin: 0;
   }
 
+  .author-link {
+    background: transparent;
+    border: 0;
+    color: var(--accent);
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .author-link:hover {
+    color: #a93226;
+  }
+
   .card-synopsis {
     font-size: 0.88rem;
     line-height: 1.75;
@@ -213,6 +251,31 @@
     -webkit-line-clamp: 6;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  .card-synopsis.expanded {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+  }
+
+  .synopsis-toggle {
+    align-self: flex-start;
+    margin-top: 2px;
+    padding: 4px 0;
+    background: transparent;
+    border: 0;
+    color: var(--accent);
+    cursor: pointer;
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .synopsis-toggle:hover {
+    color: #a93226;
   }
 
   .card-footer {
@@ -332,7 +395,9 @@
     }
 
     .logo { font-size: 1.2rem; }
-    .search-row { min-width: 100%; }
+    .search-area,
+    .search-row,
+    .search-group { min-width: 100%; }
     main { padding: 20px 16px 48px; }
     .grid { grid-template-columns: 1fr; }
   }
@@ -342,9 +407,21 @@
 <header>
   <div class="header-inner">
     <div class="logo">あらすじ<span>検索</span></div>
-    <div class="search-row">
-      <input class="search-input" id="authorInput" type="text" placeholder="作家名を入力　例：東野圭吾" autocomplete="off">
-      <button class="search-btn" id="searchBtn" type="button">検索</button>
+    <div class="search-area">
+      <div class="search-group">
+        <label class="search-label" for="authorInput">作家名で検索</label>
+        <div class="search-row">
+          <input class="search-input" id="authorInput" type="text" placeholder="例：東野圭吾" autocomplete="off">
+          <button class="search-btn" id="authorSearchBtn" type="button">検索</button>
+        </div>
+      </div>
+      <div class="search-group">
+        <label class="search-label" for="synopsisInput">あらすじで検索</label>
+        <div class="search-row">
+          <input class="search-input" id="synopsisInput" type="text" placeholder="例：事件、青春、復讐" autocomplete="off">
+          <button class="search-btn" id="synopsisSearchBtn" type="button">検索</button>
+        </div>
+      </div>
     </div>
   </div>
 </header>
@@ -371,7 +448,7 @@
   </div>
 </main>
 
-<footer class="site-version">ver.2</footer>
+<footer class="site-version">ver.5</footer>
 
 <script>
 // Rakuten Web ServiceのapplicationIdとaccessKeyを入れると実データ検索になります。
@@ -438,7 +515,9 @@ const DEMO_DATA = {
 };
 
 const authorInput = document.getElementById("authorInput");
-const searchBtn = document.getElementById("searchBtn");
+const synopsisInput = document.getElementById("synopsisInput");
+const authorSearchBtn = document.getElementById("authorSearchBtn");
+const synopsisSearchBtn = document.getElementById("synopsisSearchBtn");
 const content = document.getElementById("content");
 const statusBar = document.getElementById("statusBar");
 const statusAuthor = document.getElementById("statusAuthor");
@@ -449,25 +528,66 @@ if (!APP_ID || !ACCESS_KEY) {
   apiNote.classList.remove("hidden");
 }
 
-searchBtn.addEventListener("click", doSearch);
+authorSearchBtn.addEventListener("click", doAuthorSearch);
+synopsisSearchBtn.addEventListener("click", doSynopsisSearch);
 authorInput.addEventListener("keydown", event => {
-  if (event.key === "Enter") doSearch();
+  if (event.key === "Enter") doAuthorSearch();
+});
+synopsisInput.addEventListener("keydown", event => {
+  if (event.key === "Enter") doSynopsisSearch();
 });
 
-async function doSearch() {
+content.addEventListener("click", event => {
+  const authorLink = event.target.closest(".author-link");
+  if (authorLink) {
+    authorInput.value = authorLink.dataset.author || authorLink.textContent.trim();
+    doAuthorSearch();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+
+  const toggle = event.target.closest(".synopsis-toggle");
+  if (!toggle) return;
+
+  const synopsis = toggle.previousElementSibling;
+  const expanded = toggle.getAttribute("aria-expanded") === "true";
+  synopsis.classList.toggle("expanded", !expanded);
+  toggle.setAttribute("aria-expanded", String(!expanded));
+  toggle.textContent = expanded ? "すべてを表示" : "閉じる";
+});
+
+async function doAuthorSearch() {
   const author = authorInput.value.trim();
   if (!author) return;
 
   showLoading();
-  searchBtn.disabled = true;
+  authorSearchBtn.disabled = true;
 
   try {
     const books = APP_ID && ACCESS_KEY ? await fetchRakuten(author) : getDemoData(author);
-    render(author, books);
+    render(author, books, "author");
   } catch (error) {
     showError(error.message || "検索に失敗しました。");
   } finally {
-    searchBtn.disabled = false;
+    authorSearchBtn.disabled = false;
+  }
+}
+
+async function doSynopsisSearch() {
+  const keyword = synopsisInput.value.trim();
+  if (!keyword) return;
+
+  showLoading();
+  synopsisSearchBtn.disabled = true;
+
+  try {
+    const sourceBooks = APP_ID && ACCESS_KEY ? await fetchRakutenByKeyword(keyword) : getAllDemoData();
+    const books = filterBooksBySynopsis(sourceBooks, keyword);
+    render(keyword, books, "synopsis");
+  } catch (error) {
+    showError(error.message || "検索に失敗しました。");
+  } finally {
+    synopsisSearchBtn.disabled = false;
   }
 }
 
@@ -486,6 +606,53 @@ async function fetchRakuten(author) {
   let response;
   try {
     response = await fetch(`https://openapi.rakuten.co.jp/services/api/BooksBook/Search/20170404?${params.toString()}`, {
+      method: "GET",
+      mode: "cors",
+      referrerPolicy: "strict-origin-when-cross-origin"
+    });
+  } catch (error) {
+    throw new Error("楽天APIに接続できませんでした。アップロード先のURLを楽天Webサービスのアプリ設定で許可済みWebサイトに登録してください。file://で直接開いている場合は実API検索できません。");
+  }
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const apiError = data?.errors?.errorMessage || data?.error_description || response.statusText;
+    throw new Error(formatRakutenError(apiError));
+  }
+
+  if (data?.error || data?.errors) {
+    const apiError = data.error_description || data.errors?.errorMessage || data.error;
+    throw new Error(formatRakutenError(apiError));
+  }
+
+  return (data.Items || []).map(({ Item }) => ({
+    title: Item.title,
+    author: Item.author,
+    publisher: Item.publisherName,
+    publishedDate: Item.salesDate,
+    price: Item.itemPrice,
+    synopsis: Item.itemCaption || "あらすじは登録されていません。",
+    url: Item.affiliateUrl || Item.itemUrl,
+    image: Item.largeImageUrl || Item.mediumImageUrl || ""
+  }));
+}
+
+async function fetchRakutenByKeyword(keyword) {
+  const params = new URLSearchParams({
+    applicationId: APP_ID,
+    accessKey: ACCESS_KEY,
+    keyword,
+    booksGenreId: "001004",
+    hits: "30",
+    format: "json"
+  });
+
+  if (AFFILIATE_ID) params.set("affiliateId", AFFILIATE_ID);
+
+  let response;
+  try {
+    response = await fetch(`https://openapi.rakuten.co.jp/services/api/BooksTotal/Search/20170404?${params.toString()}`, {
       method: "GET",
       mode: "cors",
       referrerPolicy: "strict-origin-when-cross-origin"
@@ -544,16 +711,32 @@ function getDemoData(author) {
   return key ? DEMO_DATA[key] : [];
 }
 
-function render(author, books) {
+function getAllDemoData() {
+  return Object.values(DEMO_DATA).flat();
+}
+
+function filterBooksBySynopsis(books, keyword) {
+  const normalizedKeyword = normalizeText(keyword);
+  return books.filter(book => normalizeText(book.synopsis).includes(normalizedKeyword));
+}
+
+function normalizeText(value) {
+  return String(value ?? "").toLocaleLowerCase("ja-JP");
+}
+
+function render(query, books, mode = "author") {
   statusBar.classList.remove("hidden");
-  statusAuthor.textContent = author;
+  statusAuthor.textContent = mode === "synopsis" ? `あらすじ: ${query}` : query;
   statusCount.textContent = books.length > 0 ? `${books.length}件` : "";
 
   if (books.length === 0) {
+    const emptyText = mode === "synopsis"
+      ? `あらすじに「${escHtml(query)}」を含む作品が見つかりませんでした。`
+      : `「${escHtml(query)}」の作品が見つかりませんでした。`;
     content.innerHTML = `
       <div class="state-box">
         <span class="icon">?</span>
-        <p><strong>「${escHtml(author)}」</strong>の作品が見つかりませんでした。<br>作家名を確認して、もう一度検索してください。</p>
+        <p><strong>${emptyText}</strong><br>キーワードを変えて、もう一度検索してください。</p>
       </div>`;
     return;
   }
@@ -566,11 +749,12 @@ function render(author, books) {
       <div class="card-body">
         <div class="card-title">${escHtml(book.title)}</div>
         <div class="card-meta">
-          <span>${escHtml(book.author)}</span>
+          <span><button class="author-link" type="button" data-author="${escAttr(book.author)}">${escHtml(book.author)}</button></span>
           ${book.publisher ? `<span>${escHtml(book.publisher)}</span>` : ""}
           ${book.publishedDate ? `<span>${escHtml(book.publishedDate)}</span>` : ""}
         </div>
         <div class="card-synopsis">${escHtml(book.synopsis)}</div>
+        ${shouldShowSynopsisToggle(book.synopsis) ? `<button class="synopsis-toggle" type="button" aria-expanded="false">すべてを表示</button>` : ""}
       </div>
       <div class="card-footer">
         <span class="price">${book.price ? `¥${Number(book.price).toLocaleString()}` : ""}</span>
@@ -600,6 +784,10 @@ function showError(message) {
       <span class="icon">!</span>
       <p>${escHtml(message)}</p>
     </div>`;
+}
+
+function shouldShowSynopsisToggle(synopsis) {
+  return String(synopsis ?? "").length > 90;
 }
 
 function escHtml(value) {
