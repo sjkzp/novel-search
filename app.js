@@ -118,7 +118,57 @@ const FEATURED_AUTHORS = [
   "似鳥鶏",
   "相沢沙呼",
   "阿津川辰海",
-  "結城真一郎"
+  "結城真一郎",
+  "夏目漱石",
+  "森鴎外",
+  "芥川龍之介",
+  "太宰治",
+  "川端康成",
+  "三島由紀夫",
+  "谷崎潤一郎",
+  "志賀直哉",
+  "泉鏡花",
+  "江戸川乱歩",
+  "横溝正史",
+  "松本清張",
+  "司馬遼太郎",
+  "池波正太郎",
+  "山崎豊子",
+  "向田邦子",
+  "赤川次郎",
+  "星新一",
+  "筒井康隆",
+  "新井素子",
+  "上橋菜穂子",
+  "荻原規子",
+  "あさのあつこ",
+  "宗田理",
+  "那須正幹",
+  "角野栄子",
+  "柏葉幸子",
+  "岡田淳",
+  "富安陽子",
+  "廣嶋玲子",
+  "令丈ヒロ子",
+  "松本祐子",
+  "はやみねかおる",
+  "緑川聖司",
+  "佐藤多佳子",
+  "森絵都",
+  "椰月美智子",
+  "梨屋アリエ",
+  "石崎洋司",
+  "斉藤洋",
+  "村山早紀",
+  "加納朋子",
+  "近藤史恵",
+  "坂木司",
+  "北村薫",
+  "若竹七海",
+  "畠中恵",
+  "澤村伊智",
+  "恒川光太郎",
+  "上田早夕里"
 ];
 
 const FEATURED_KEYWORDS = [
@@ -283,7 +333,7 @@ function updateSearchPlaceholder() {
 
 function setupQuickSearches() {
   setQuickSearchGroup("author", pickRandomItems(FEATURED_AUTHORS, 2));
-  setQuickSearchGroup("synopsis", pickRandomItems(FEATURED_KEYWORDS, 2));
+  setQuickSearchGroup("synopsis", pickRandomItems(FEATURED_KEYWORDS, 3));
 }
 
 function setQuickSearchGroup(mode, queries) {
