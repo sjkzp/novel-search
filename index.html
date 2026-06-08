@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>あらすじ棚 — 作家で探す小説</title>
+<title>あらすじ検索 - 作家で探す小説</title>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -15,7 +15,7 @@
     --muted: #7a6f62;
     --border: #c8b99a;
     --card-bg: #faf7f2;
-    --shadow: rgba(26,16,8,0.12);
+    --shadow: rgba(26, 16, 8, 0.12);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,14 +23,12 @@
   body {
     background: var(--paper);
     color: var(--ink);
-    font-family: 'Shippori Mincho', serif;
+    font-family: "Shippori Mincho", serif;
     min-height: 100vh;
   }
 
-  /* ── HEADER ── */
   header {
     background: var(--ink);
-    padding: 0;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -48,7 +46,7 @@
   }
 
   .logo {
-    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-family: "Zen Kaku Gothic New", sans-serif;
     font-weight: 900;
     font-size: 1.5rem;
     color: var(--paper);
@@ -56,22 +54,20 @@
     white-space: nowrap;
   }
 
-  .logo span {
-    color: var(--accent);
-  }
+  .logo span { color: var(--accent); }
 
   .search-row {
     display: flex;
     gap: 8px;
     flex: 1;
-    min-width: 0;
-    width: 100%;
+    min-width: 280px;
   }
 
   .search-input {
     flex: 1;
+    min-width: 0;
     padding: 10px 16px;
-    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-family: "Zen Kaku Gothic New", sans-serif;
     font-size: 1rem;
     background: #2a1f14;
     border: 1px solid #4a3828;
@@ -81,16 +77,16 @@
     transition: border-color 0.2s;
   }
 
-  .search-input::placeholder { color: #7a6550; }
+  .search-input::placeholder { color: #b79f88; }
   .search-input:focus { border-color: var(--accent); }
 
   .search-btn {
     padding: 10px 22px;
     background: var(--accent);
     color: #fff;
-    border: none;
+    border: 0;
     border-radius: 4px;
-    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-family: "Zen Kaku Gothic New", sans-serif;
     font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;
@@ -100,15 +96,14 @@
 
   .search-btn:hover { background: #a93226; }
   .search-btn:active { transform: scale(0.97); }
+  .search-btn:disabled { cursor: wait; opacity: 0.75; }
 
-  /* ── MAIN ── */
   main {
     max-width: 1200px;
     margin: 0 auto;
     padding: 32px 24px 64px;
   }
 
-  /* ── STATUS BAR ── */
   .status-bar {
     display: flex;
     align-items: baseline;
@@ -119,10 +114,9 @@
   }
 
   .status-author {
-    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-family: "Zen Kaku Gothic New", sans-serif;
     font-size: 1.4rem;
     font-weight: 900;
-    color: var(--ink);
   }
 
   .status-count {
@@ -130,16 +124,14 @@
     color: var(--muted);
   }
 
-  .status-bar.hidden { display: none; }
+  .hidden { display: none !important; }
 
-  /* ── GRID ── */
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
   }
 
-  /* ── CARD ── */
   .card {
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -158,12 +150,12 @@
 
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .card-cover {
     width: 100%;
-    aspect-ratio: 3/2;
+    aspect-ratio: 3 / 2;
     object-fit: cover;
     background: var(--cream);
     display: block;
@@ -187,11 +179,10 @@
   }
 
   .card-title {
-    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-family: "Zen Kaku Gothic New", sans-serif;
     font-weight: 700;
     font-size: 1rem;
     line-height: 1.4;
-    color: var(--ink);
   }
 
   .card-meta {
@@ -203,11 +194,15 @@
   }
 
   .card-meta span::before {
-    content: '／';
+    content: "・";
     margin-right: 4px;
     opacity: 0.4;
   }
-  .card-meta span:first-child::before { content: ''; margin: 0; }
+
+  .card-meta span:first-child::before {
+    content: "";
+    margin: 0;
+  }
 
   .card-synopsis {
     font-size: 0.88rem;
@@ -230,7 +225,7 @@
   }
 
   .price {
-    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-family: "Zen Kaku Gothic New", sans-serif;
     font-size: 0.95rem;
     font-weight: 700;
     color: var(--accent);
@@ -243,7 +238,7 @@
     color: #fff;
     text-decoration: none;
     border-radius: 4px;
-    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-family: "Zen Kaku Gothic New", sans-serif;
     font-size: 0.82rem;
     font-weight: 700;
     transition: background 0.15s;
@@ -252,7 +247,6 @@
 
   .buy-btn:hover { background: #cf6d17; }
 
-  /* ── STATES ── */
   .state-box {
     text-align: center;
     padding: 80px 20px;
@@ -272,17 +266,19 @@
 
   .state-box strong {
     color: var(--ink);
-    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-family: "Zen Kaku Gothic New", sans-serif;
   }
 
   .loading-dots span {
     display: inline-block;
-    width: 8px; height: 8px;
+    width: 8px;
+    height: 8px;
     background: var(--accent);
     border-radius: 50%;
     margin: 0 3px;
     animation: bounce 1s infinite;
   }
+
   .loading-dots span:nth-child(2) { animation-delay: 0.15s; }
   .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
 
@@ -291,7 +287,6 @@
     40% { transform: translateY(-8px); }
   }
 
-  /* ── API NOTE ── */
   .api-note {
     background: #fff8e1;
     border: 1px solid #f9c74f;
@@ -306,7 +301,11 @@
     align-items: flex-start;
   }
 
-  .api-note .icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+  .api-note .icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
 
   code {
     background: #ede8dc;
@@ -316,34 +315,36 @@
     font-size: 0.9em;
   }
 
-  /* ── RESPONSIVE ── */
   @media (max-width: 600px) {
-    .header-inner { padding: 14px 16px; gap: 12px; }
+    .header-inner {
+      padding: 14px 16px;
+      gap: 12px;
+    }
+
     .logo { font-size: 1.2rem; }
+    .search-row { min-width: 100%; }
     main { padding: 20px 16px 48px; }
     .grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
-
 <header>
   <div class="header-inner">
-    <div class="logo">あらすじ<span>棚</span></div>
+    <div class="logo">あらすじ<span>検索</span></div>
     <div class="search-row">
-      <input class="search-input" id="authorInput" type="text" placeholder="作家名を入力　例：東野圭吾" />
-      <button class="search-btn" id="searchBtn">検索</button>
+      <input class="search-input" id="authorInput" type="text" placeholder="作家名を入力　例：東野圭吾" autocomplete="off">
+      <button class="search-btn" id="searchBtn" type="button">検索</button>
     </div>
   </div>
 </header>
 
 <main>
-  <div class="api-note" id="apiNote">
-    <span class="icon">⚠️</span>
+  <div class="api-note hidden" id="apiNote">
+    <span class="icon">!</span>
     <div>
-      <strong>デモモード</strong> — 現在はサンプルデータで動作しています。
-      楽天Webサービスで <code>APP_ID</code> を取得後、スクリプト冒頭の定数を差し替えると
-      楽天ブックスAPIからリアルタイムにデータを取得できます（JSONP方式・サーバー不要）。
+      <strong>デモモード</strong> 現在はサンプルデータで動作しています。
+      楽天Webサービスで <code>APP_ID</code> を取得し、スクリプト先頭の設定を書き換えると楽天ブックスAPIから実データを取得できます。
     </div>
   </div>
 
@@ -354,229 +355,207 @@
 
   <div id="content">
     <div class="state-box">
-      <span class="icon">📚</span>
-      <p>作家名を入れて検索すると<br>あらすじつき作品一覧が表示されます</p>
+      <span class="icon">⌕</span>
+      <p>作家名を入力して検索すると<br>小説の作品一覧とあらすじが表示されます。</p>
     </div>
   </div>
 </main>
 
 <script>
-// ─────────────────────────────────────────
-//  設定（APIキー取得後にここを差し替える）
-// ─────────────────────────────────────────
-const APP_ID       = 'd77d6759-3260-43eb-81b7-fd153a98e8ba';
-const AFFILIATE_ID = '54aa3625.ee1bf9ab.54aa3626.b59c4a5f';
+const APP_ID = "d77d6759-3260-43eb-81b7-fd153a98e8ba";
+const AFFILIATE_ID = "54aa3625.ee1bf9ab.54aa3626.b59c4a5f";
 
-// ─────────────────────────────────────────
-//  デモ用サンプルデータ
-// ─────────────────────────────────────────
 const DEMO_DATA = {
-  '東野圭吾': [
+  "東野圭吾": [
     {
-      title: '容疑者Xの献身',
-      author: '東野圭吾',
-      publisher: '文藝春秋',
-      publishedDate: '2008-08',
+      title: "容疑者Xの献身",
+      author: "東野圭吾",
+      publisher: "文藝春秋",
+      publishedDate: "2008-08",
       price: 858,
-      synopsis: '天才数学者にして孤独な高校教師・石神は、隣室に越してきたシングルマザーの花岡靖子に密かな思いを寄せていた。ある日、靖子の元夫が殺される事件が起きる。石神は完全なアリバイトリックを仕掛け、靖子をかばうために驚くべき行動に出る。ガリレオこと湯川学が挑む、究極の「献身」の謎。',
-      url: 'https://books.rakuten.co.jp/',
-      image: ''
+      synopsis: "天才数学者で高校教師の石神は、隣人の花岡靖子が起こした事件を知り、完全なアリバイ工作を仕掛ける。湯川学が挑む、愛と論理のミステリー。",
+      url: "https://books.rakuten.co.jp/",
+      image: ""
     },
     {
-      title: '白夜行',
-      author: '東野圭吾',
-      publisher: '集英社',
-      publishedDate: '2002-08',
+      title: "白夜行",
+      author: "東野圭吾",
+      publisher: "集英社",
+      publishedDate: "2002-08",
       price: 1045,
-      synopsis: '1973年、大阪の廃墟で質屋の主人が死体で発見された。容疑者は死亡し、事件は迷宮入りとなる。その後、被害者の息子・桐原亮司と、容疑者の娘・西本雪穂の人生が交差し続ける。二人はそれぞれの「白夜」を生きながら、暗闇の中を疾走する。1000ページを超す圧倒的大作。',
-      url: 'https://books.rakuten.co.jp/',
-      image: ''
+      synopsis: "大阪の質屋殺しを発端に、被害者の息子と容疑者の娘の人生が交差していく。長い歳月をかけて闇の中を歩む二人を描く長編小説。",
+      url: "https://books.rakuten.co.jp/",
+      image: ""
     },
     {
-      title: '手紙',
-      author: '東野圭吾',
-      publisher: '文藝春秋',
-      publishedDate: '2006-10',
+      title: "手紙",
+      author: "東野圭吾",
+      publisher: "文藝春秋",
+      publishedDate: "2006-10",
       price: 748,
-      synopsis: '強盗殺人を犯し服役中の兄・剛志から、弟・直貴のもとへ毎月手紙が届く。就職、恋愛、音楽活動——直貴の人生は「殺人犯の弟」という烙印によって、繰り返し歪められていく。犯罪が加害者家族に与える苦しみを真摯に描いた、慟哭の社会派小説。',
-      url: 'https://books.rakuten.co.jp/',
-      image: ''
-    },
-    {
-      title: '秘密',
-      author: '東野圭吾',
-      publisher: '文藝春秋',
-      publishedDate: '2001-01',
-      price: 748,
-      synopsis: 'バス事故で昏睡状態の娘・藻奈美が目を覚ますと、そこには死んだはずの妻・直子の人格が宿っていた。娘の体で生きる妻と、夫・杉田平介。二人は「秘密」を共有しながら奇妙な共同生活を続けるが、やがて藻奈美の本来の人格が戻り始める。愛とは何かを問う傑作。',
-      url: 'https://books.rakuten.co.jp/',
-      image: ''
-    },
-    {
-      title: 'ナミヤ雑貨店の奇蹟',
-      author: '東野圭吾',
-      publisher: '角川書店',
-      publishedDate: '2014-11',
-      price: 858,
-      synopsis: '廃業した雑貨店に迷い込んだ3人の若者。シャッターの郵便口に差し込まれた手紙に気づく。それは過去から届いた、人生相談の手紙だった——。時空を超えて交錯する人々の悩みと希望。温かな奇蹟が連鎖する、東野圭吾の新境地。',
-      url: 'https://books.rakuten.co.jp/',
-      image: ''
-    },
-    {
-      title: '流星の絆',
-      author: '東野圭吾',
-      publisher: '講談社',
-      publishedDate: '2010-07',
-      price: 858,
-      synopsis: '幼い3兄妹の目の前で両親が殺された。14年後、成長した兄妹は詐欺師として生きながら、ひそかに復讐の機会を狙っていた。そしてある日、容疑者の息子と出会う。復讐か、赦しか——骨太なミステリと家族の絆が交差する長編。',
-      url: 'https://books.rakuten.co.jp/',
-      image: ''
-    },
+      synopsis: "強盗殺人を犯した兄を持つ弟に、毎月刑務所から手紙が届く。加害者家族として生きる苦しみと社会のまなざしを描く作品。",
+      url: "https://books.rakuten.co.jp/",
+      image: ""
+    }
   ],
-  '村上春樹': [
+  "村上春樹": [
     {
-      title: 'ノルウェイの森',
-      author: '村上春樹',
-      publisher: '講談社',
-      publishedDate: '2004-09',
+      title: "ノルウェイの森",
+      author: "村上春樹",
+      publisher: "講談社",
+      publishedDate: "2004-09",
       price: 836,
-      synopsis: '1960年代末、大学生のワタナベは、親友キズキの死後もその彼女・直子と交流を続ける。やがて直子は心を病み療養施設へ。ワタナベは生命力あふれる緑とも心を通わせながら、喪失と再生の季節を生きる。世界的ベストセラーとなった、青春と死をめぐる純愛小説。',
-      url: 'https://books.rakuten.co.jp/',
-      image: ''
+      synopsis: "1960年代末、大学生のワタナベは親友の死をきっかけに直子と向き合う。喪失と再生、青春の痛みを静かに描いた長編小説。",
+      url: "https://books.rakuten.co.jp/",
+      image: ""
     },
     {
-      title: '1Q84',
-      author: '村上春樹',
-      publisher: '新潮社',
-      publishedDate: '2012-10',
+      title: "1Q84",
+      author: "村上春樹",
+      publisher: "新潮社",
+      publishedDate: "2012-10",
       price: 1034,
-      synopsis: '1984年の東京。ふとしたことからパラレルワールド「1Q84年」に迷い込んだ青豆と天吾。二つの月が浮かぶ歪んだ世界で、二人は互いを探し求める。カルト宗教の闇、リトル・ピープルの謎——壮大なスケールで描かれる愛と現実の物語。',
-      url: 'https://books.rakuten.co.jp/',
-      image: ''
-    },
-    {
-      title: '騎士団長殺し',
-      author: '村上春樹',
-      publisher: '新潮社',
-      publishedDate: '2017-02',
-      price: 1980,
-      synopsis: '肖像画家の「私」は妻との別居を機に、友人の父・雨田具彦の山荘に住み込む。屋根裏から発見された奇妙な絵「騎士団長殺し」。やがて謎めいた隣人・免色渉と少女・秋川まりえが現れ、現実と非現実の境界が溶け始める。',
-      url: 'https://books.rakuten.co.jp/',
-      image: ''
-    },
+      synopsis: "1984年の東京から、二つの月が浮かぶもうひとつの世界へ。青豆と天吾の物語が交錯する壮大な長編。",
+      url: "https://books.rakuten.co.jp/",
+      image: ""
+    }
   ]
 };
 
-// ─────────────────────────────────────────
-//  UI
-// ─────────────────────────────────────────
-const authorInput = document.getElementById('authorInput');
-const searchBtn   = document.getElementById('searchBtn');
-const content     = document.getElementById('content');
-const statusBar   = document.getElementById('statusBar');
-const statusAuthor= document.getElementById('statusAuthor');
-const statusCount = document.getElementById('statusCount');
+const authorInput = document.getElementById("authorInput");
+const searchBtn = document.getElementById("searchBtn");
+const content = document.getElementById("content");
+const statusBar = document.getElementById("statusBar");
+const statusAuthor = document.getElementById("statusAuthor");
+const statusCount = document.getElementById("statusCount");
+const apiNote = document.getElementById("apiNote");
 
-searchBtn.addEventListener('click', doSearch);
-authorInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+if (!APP_ID) {
+  apiNote.classList.remove("hidden");
+}
 
-// APP_IDがセットされていたらデモ注意書きを消す
-if (APP_ID) document.getElementById('apiNote')?.remove();
+searchBtn.addEventListener("click", doSearch);
+authorInput.addEventListener("keydown", event => {
+  if (event.key === "Enter") doSearch();
+});
 
 async function doSearch() {
   const author = authorInput.value.trim();
   if (!author) return;
+
   showLoading();
+  searchBtn.disabled = true;
+
   try {
-    const books = APP_ID
-      ? await fetchRakutenJSONP(author)
-      : getDemoData(author);
+    const books = APP_ID ? await fetchRakutenJSONP(author) : getDemoData(author);
     render(author, books);
-  } catch(e) {
-    showError(e.message);
+  } catch (error) {
+    showError(error.message || "検索に失敗しました。");
+  } finally {
+    searchBtn.disabled = false;
   }
 }
 
-// ─────────────────────────────────────────
-//  楽天ブックスAPI（fetch）
-// ─────────────────────────────────────────
-async function fetchRakutenJSONP(author) {
-  const params = new URLSearchParams({
-    applicationId: APP_ID,
-    author:        author,
-    hits:          30,
+function fetchRakutenJSONP(author) {
+  return new Promise((resolve, reject) => {
+    const callbackName = `rakutenBooksCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const params = new URLSearchParams({
+      applicationId: APP_ID,
+      author,
+      booksGenreId: "001004",
+      hits: "30",
+      format: "json",
+      callback: callbackName
+    });
+
+    if (AFFILIATE_ID) params.set("affiliateId", AFFILIATE_ID);
+
+    const script = document.createElement("script");
+    const timeoutId = window.setTimeout(() => {
+      cleanup();
+      reject(new Error("APIの応答がありませんでした。時間をおいて再検索してください。"));
+    }, 12000);
+
+    window[callbackName] = data => {
+      cleanup();
+      if (data.error) {
+        reject(new Error(`${data.error}: ${data.error_description || ""}`));
+        return;
+      }
+
+      resolve((data.Items || []).map(({ Item }) => ({
+        title: Item.title,
+        author: Item.author,
+        publisher: Item.publisherName,
+        publishedDate: Item.salesDate,
+        price: Item.itemPrice,
+        synopsis: Item.itemCaption || "あらすじは登録されていません。",
+        url: Item.affiliateUrl || Item.itemUrl,
+        image: Item.largeImageUrl || Item.mediumImageUrl || ""
+      })));
+    };
+
+    script.onerror = () => {
+      cleanup();
+      reject(new Error("APIの読み込みに失敗しました。ネットワーク接続を確認してください。"));
+    };
+
+    function cleanup() {
+      window.clearTimeout(timeoutId);
+      delete window[callbackName];
+      script.remove();
+    }
+
+    script.src = `https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?${params.toString()}`;
+    document.body.appendChild(script);
   });
-  if (AFFILIATE_ID) params.set('affiliateId', AFFILIATE_ID);
-  const url = `https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?${params}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('API取得失敗: ' + res.status);
-  const data = await res.json();
-  if (data.error) throw new Error(data.error + ': ' + (data.error_description || ''));
-  return (data.Items || []).map(item => ({
-    title:         item.title,
-    author:        item.author,
-    publisher:     item.publisherName,
-    publishedDate: item.salesDate,
-    price:         item.itemPrice,
-    synopsis:      item.itemCaption || '（あらすじ未登録）',
-    url:           item.affiliateUrl || item.itemUrl,
-    image:         item.largeImageUrl || item.mediumImageUrl || '',
-  }));
 }
 
-// ─────────────────────────────────────────
-//  デモデータ
-// ─────────────────────────────────────────
 function getDemoData(author) {
-  const key = Object.keys(DEMO_DATA).find(k => k.includes(author) || author.includes(k));
-  if (key) return DEMO_DATA[key];
-  // 部分一致なければ空
-  return [];
+  const key = Object.keys(DEMO_DATA).find(name => name.includes(author) || author.includes(name));
+  return key ? DEMO_DATA[key] : [];
 }
 
-// ─────────────────────────────────────────
-//  描画
-// ─────────────────────────────────────────
 function render(author, books) {
-  statusBar.classList.remove('hidden');
+  statusBar.classList.remove("hidden");
   statusAuthor.textContent = author;
-  statusCount.textContent  = books.length > 0 ? `${books.length}件` : '';
+  statusCount.textContent = books.length > 0 ? `${books.length}件` : "";
 
   if (books.length === 0) {
     content.innerHTML = `
       <div class="state-box">
-        <span class="icon">🔍</span>
-        <p><strong>「${author}」</strong>の作品が見つかりませんでした。<br>作家名を確認してみてください。</p>
+        <span class="icon">?</span>
+        <p><strong>「${escHtml(author)}」</strong>の作品が見つかりませんでした。<br>作家名を確認して、もう一度検索してください。</p>
       </div>`;
     return;
   }
 
-  const cards = books.map((b, i) => `
-    <div class="card" style="animation-delay:${i * 0.04}s">
-      ${b.image
-        ? `<img class="card-cover" src="${b.image}" alt="${b.title}" loading="lazy">`
-        : `<div class="card-cover placeholder">📖</div>`}
+  const cards = books.map((book, index) => `
+    <div class="card" style="animation-delay:${index * 0.04}s">
+      ${book.image
+        ? `<img class="card-cover" src="${escAttr(book.image)}" alt="${escAttr(book.title)}" loading="lazy">`
+        : `<div class="card-cover placeholder">本</div>`}
       <div class="card-body">
-        <div class="card-title">${escHtml(b.title)}</div>
+        <div class="card-title">${escHtml(book.title)}</div>
         <div class="card-meta">
-          <span>${escHtml(b.author)}</span>
-          ${b.publisher ? `<span>${escHtml(b.publisher)}</span>` : ''}
-          ${b.publishedDate ? `<span>${escHtml(b.publishedDate)}</span>` : ''}
+          <span>${escHtml(book.author)}</span>
+          ${book.publisher ? `<span>${escHtml(book.publisher)}</span>` : ""}
+          ${book.publishedDate ? `<span>${escHtml(book.publishedDate)}</span>` : ""}
         </div>
-        <div class="card-synopsis">${escHtml(b.synopsis)}</div>
+        <div class="card-synopsis">${escHtml(book.synopsis)}</div>
       </div>
       <div class="card-footer">
-        <span class="price">${b.price ? `¥${b.price.toLocaleString()}` : ''}</span>
-        <a class="buy-btn" href="${b.url}" target="_blank" rel="noopener">楽天で見る →</a>
+        <span class="price">${book.price ? `¥${Number(book.price).toLocaleString()}` : ""}</span>
+        <a class="buy-btn" href="${escAttr(book.url)}" target="_blank" rel="noopener">楽天で見る</a>
       </div>
     </div>
-  `).join('');
+  `).join("");
 
   content.innerHTML = `<div class="grid">${cards}</div>`;
 }
 
 function showLoading() {
-  statusBar.classList.add('hidden');
+  statusBar.classList.add("hidden");
   content.innerHTML = `
     <div class="state-box">
       <div class="loading-dots" style="margin-bottom:16px">
@@ -586,18 +565,26 @@ function showLoading() {
     </div>`;
 }
 
-function showError(msg) {
+function showError(message) {
+  statusBar.classList.add("hidden");
   content.innerHTML = `
     <div class="state-box">
-      <span class="icon">⚠️</span>
-      <p>${escHtml(msg)}</p>
+      <span class="icon">!</span>
+      <p>${escHtml(message)}</p>
     </div>`;
 }
 
-function escHtml(s) {
-  return String(s ?? '')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function escHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function escAttr(value) {
+  return escHtml(value).replace(/`/g, "&#96;");
 }
 </script>
 </body>
