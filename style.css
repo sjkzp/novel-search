@@ -203,11 +203,16 @@
   }
 
   .hero-copy h1 {
-    max-width: 12em;
+    max-width: 10.5em;
     font-family: "Zen Kaku Gothic New", sans-serif;
-    font-size: clamp(2.15rem, 5.2vw, 4.35rem);
+    font-size: clamp(2.15rem, 5vw, 4.2rem);
     line-height: 1.12;
     letter-spacing: 0;
+  }
+
+  .hero-line {
+    display: block;
+    white-space: nowrap;
   }
 
   .hero-lead {
@@ -232,13 +237,40 @@
     max-width: 720px;
   }
 
-  .quick-search-group h2 {
+  .quick-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin-bottom: 10px;
+  }
+
+  .quick-search-group h2 {
     color: var(--muted);
     font-family: "Zen Kaku Gothic New", sans-serif;
     font-size: 0.82rem;
     font-weight: 900;
     letter-spacing: 0.08em;
+  }
+
+  .quick-refresh {
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: rgba(250, 247, 242, 0.78);
+    color: var(--accent);
+    cursor: pointer;
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-size: 1rem;
+    font-weight: 900;
+    line-height: 1;
+    transition: border-color 0.15s, background 0.15s, transform 0.2s;
+  }
+
+  .quick-refresh:hover {
+    background: #fff;
+    border-color: var(--accent);
+    transform: rotate(90deg);
   }
 
   .quick-search {
@@ -595,7 +627,11 @@
 
     .hero-copy h1 {
       font-size: 2.35rem;
-      max-width: 10em;
+      max-width: 100%;
+    }
+
+    .hero-line {
+      white-space: normal;
     }
 
     .hero-lead {

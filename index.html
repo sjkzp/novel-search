@@ -52,18 +52,28 @@
     <div class="home-hero">
       <section class="hero-copy" aria-labelledby="heroTitle">
         <p class="hero-kicker">Novel Synopsis Finder</p>
-        <h1 id="heroTitle">読みたい一冊は、あらすじの中に隠れている。</h1>
+        <h1 id="heroTitle">
+          <span class="hero-line">読みたい一冊は、</span>
+          <span class="hero-line">あらすじの中に</span>
+          <span class="hero-line">隠れている。</span>
+        </h1>
         <p class="hero-lead">好きな作家の作品を一覧で眺める。気になる言葉から物語を探す。タイトルを知らなくても、読みたい気分から小説に出会える検索サイトです。</p>
         <div class="quick-search-panel" aria-label="おすすめ検索">
           <div class="quick-search-group">
-            <h2>作家名で検索</h2>
+            <div class="quick-heading">
+              <h2>作家名で検索</h2>
+              <button class="quick-refresh" type="button" data-refresh-group="author" aria-label="作家名候補を更新">↻</button>
+            </div>
             <div class="quick-searches" data-quick-group="author">
               <button class="quick-search" type="button"></button>
               <button class="quick-search" type="button"></button>
             </div>
           </div>
           <div class="quick-search-group">
-            <h2>キーワードであらすじ検索</h2>
+            <div class="quick-heading">
+              <h2>キーワードであらすじ検索</h2>
+              <button class="quick-refresh" type="button" data-refresh-group="synopsis" aria-label="キーワード候補を更新">↻</button>
+            </div>
             <div class="quick-searches" data-quick-group="synopsis">
               <button class="quick-search" type="button"></button>
               <button class="quick-search" type="button"></button>
@@ -78,7 +88,7 @@
   <div class="pagination hidden" id="pagination"></div>
 </main>
 
-<footer class="site-version">ver.20</footer>
+<footer class="site-version">ver.22</footer>
 
 <script src="app.js"></script>
 </body>

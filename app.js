@@ -296,6 +296,12 @@ updateSearchPlaceholder();
 setupQuickSearches();
 
 content.addEventListener("click", event => {
+  const refresh = event.target.closest(".quick-refresh");
+  if (refresh) {
+    refreshQuickSearchGroup(refresh.dataset.refreshGroup);
+    return;
+  }
+
   const quickSearch = event.target.closest(".quick-search");
   if (quickSearch) {
     searchMode.value = quickSearch.dataset.mode || "author";
@@ -334,6 +340,17 @@ function updateSearchPlaceholder() {
 function setupQuickSearches() {
   setQuickSearchGroup("author", pickRandomItems(FEATURED_AUTHORS, 2));
   setQuickSearchGroup("synopsis", pickRandomItems(FEATURED_KEYWORDS, 3));
+}
+
+function refreshQuickSearchGroup(mode) {
+  if (mode === "author") {
+    setQuickSearchGroup("author", pickRandomItems(FEATURED_AUTHORS, 2));
+    return;
+  }
+
+  if (mode === "synopsis") {
+    setQuickSearchGroup("synopsis", pickRandomItems(FEATURED_KEYWORDS, 3));
+  }
 }
 
 function setQuickSearchGroup(mode, queries) {
