@@ -658,11 +658,9 @@ function render(query, books, mode = "author", meta = {}) {
 
   statusBar.classList.remove("hidden");
   statusAuthor.textContent = mode === "synopsis" ? `あらすじ: ${query}` : query;
-  statusCount.textContent = currentTotalCount > 0
-    ? `${currentTotalCount}件中 ${getPageStart(currentPage, books.length)}-${getPageEnd(currentPage, books.length)}件`
-    : "";
 
   if (books.length === 0) {
+    statusCount.textContent = "";
     const emptyText = mode === "synopsis"
       ? `あらすじに「${escHtml(query)}」を含む作品が見つかりませんでした。`
       : `「${escHtml(query)}」の作品が見つかりませんでした。`;
@@ -678,9 +676,7 @@ function render(query, books, mode = "author", meta = {}) {
   renderGenreFilter(books);
 
   const filteredBooks = filterBooksByGenre(books);
-  if (currentGenreSelection && filteredBooks.length !== books.length) {
-    statusCount.textContent = `${statusCount.textContent} / 表示 ${filteredBooks.length}件`;
-  }
+  updateStatusCount(books.length, filteredBooks.length);
   const sortedBooks = sortBooksByDate(filteredBooks, sortSelect.value);
   const cards = sortedBooks.map((book, index) => `
     <div class="card" style="animation-delay:${index * 0.04}s">
@@ -720,6 +716,21 @@ function getPageStart(page, itemCount) {
 
 function getPageEnd(page, itemCount) {
   return (page - 1) * ITEMS_PER_PAGE + itemCount;
+}
+
+function updateStatusCount(pageItemCount, visibleItemCount) {
+  if (pageItemCount === 0) {
+    statusCount.textContent = "";
+    return;
+  }
+
+  const rangeText = currentTotalCount > 0
+    ? `${currentTotalCount}件中 ${getPageStart(currentPage, pageItemCount)}-${getPageEnd(currentPage, pageItemCount)}件`
+    : `${pageItemCount}件`;
+
+  statusCount.textContent = visibleItemCount === pageItemCount
+    ? rangeText
+    : `${rangeText} / 表示 ${visibleItemCount}件`;
 }
 
 function renderPagination() {
