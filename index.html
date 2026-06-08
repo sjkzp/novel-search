@@ -52,6 +52,7 @@
     color: var(--paper);
     letter-spacing: 0.05em;
     white-space: nowrap;
+    text-decoration: none;
   }
 
   .logo span { color: var(--accent); }
@@ -241,6 +242,16 @@
     font-weight: 700;
     font-size: 1rem;
     line-height: 1.4;
+  }
+
+  .card-title a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .card-title a:hover {
+    color: #a93226;
   }
 
   .card-meta {
@@ -475,6 +486,42 @@
     .search-row { min-width: 100%; flex-wrap: wrap; }
     .search-select { flex: 1 1 100%; }
     main { padding: 20px 16px 48px; }
+
+    body.has-results .header-inner {
+      padding: 8px 10px;
+      gap: 6px;
+    }
+
+    body.has-results .logo {
+      font-size: 1rem;
+      width: 100%;
+    }
+
+    body.has-results .search-row {
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+
+    body.has-results .search-select {
+      flex: 0 0 108px;
+      padding: 8px 7px;
+      font-size: 0.82rem;
+    }
+
+    body.has-results .search-input {
+      padding: 8px 9px;
+      font-size: 0.9rem;
+    }
+
+    body.has-results .search-btn {
+      padding: 8px 11px;
+      font-size: 0.86rem;
+    }
+
+    body.has-results main {
+      padding-top: 14px;
+    }
+
     .card {
       flex-direction: column;
       min-height: 0;
@@ -507,7 +554,7 @@
 <body>
 <header>
   <div class="header-inner">
-    <div class="logo">あらすじ<span>検索</span></div>
+    <a class="logo" href="./index.html">あらすじ<span>検索</span></a>
     <div class="search-row">
       <select class="search-select" id="searchMode" aria-label="検索種別">
         <option value="author">作家で検索</option>
@@ -551,7 +598,7 @@
   <div class="pagination hidden" id="pagination"></div>
 </main>
 
-<footer class="site-version">ver.9</footer>
+<footer class="site-version">ver.11</footer>
 
 <script>
 // Rakuten Web ServiceのapplicationIdとaccessKeyを入れると実データ検索になります。
@@ -773,7 +820,6 @@ async function fetchRakuten(author, page = 1) {
     applicationId: APP_ID,
     accessKey: ACCESS_KEY,
     author,
-    booksGenreId: "001004",
     hits: "30",
     page: String(page),
     format: "json"
@@ -867,8 +913,19 @@ function normalizeRakutenItems(data) {
     price: Item.itemPrice,
     synopsis: Item.itemCaption || "あらすじは登録されていません。",
     url: Item.affiliateUrl || Item.itemUrl,
-    image: Item.largeImageUrl || Item.mediumImageUrl || ""
+    image: getBetterImageUrl(Item.largeImageUrl || Item.mediumImageUrl || "")
   }));
+}
+
+function getBetterImageUrl(url) {
+  const text = String(url || "");
+  if (!text) return "";
+
+  if (/[?&]_ex=\d+x\d+/.test(text)) {
+    return text.replace(/([?&]_ex=)\d+x\d+/, (_match, prefix) => `${prefix}500x500`);
+  }
+
+  return text;
 }
 
 function formatRakutenError(message) {
@@ -924,6 +981,7 @@ function normalizeText(value) {
 }
 
 function render(query, books, mode = "author", meta = {}) {
+  document.body.classList.add("has-results");
   currentBooks = books;
   currentQuery = query;
   currentMode = mode;
@@ -1059,6 +1117,7 @@ function getDateValue(value) {
 }
 
 function showLoading() {
+  document.body.classList.add("has-results");
   statusBar.classList.add("hidden");
   pagination.classList.add("hidden");
   pagination.innerHTML = "";
@@ -1072,6 +1131,7 @@ function showLoading() {
 }
 
 function showError(message) {
+  document.body.classList.add("has-results");
   statusBar.classList.add("hidden");
   pagination.classList.add("hidden");
   pagination.innerHTML = "";
