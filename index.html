@@ -193,10 +193,24 @@
     width: 180px;
     min-width: 180px;
     aspect-ratio: auto;
-    object-fit: cover;
+    object-fit: contain;
     background: var(--cream);
     display: block;
     border-right: 1px solid var(--border);
+  }
+
+  .card-cover-link {
+    width: 180px;
+    min-width: 180px;
+    display: flex;
+    background: var(--cream);
+    border-right: 1px solid var(--border);
+  }
+
+  .card-cover-link .card-cover {
+    width: 100%;
+    min-width: 0;
+    border-right: 0;
   }
 
   .card-cover.placeholder {
@@ -297,6 +311,10 @@
 
   .synopsis-toggle:hover {
     color: #a93226;
+  }
+
+  .synopsis-toggle.hidden {
+    display: none;
   }
 
   .card-footer {
@@ -401,6 +419,44 @@
     text-align: right;
   }
 
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+
+  .page-btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--card-bg);
+    color: var(--ink);
+    cursor: pointer;
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-weight: 700;
+  }
+
+  .page-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .page-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .page-btn:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+
   code {
     background: #ede8dc;
     padding: 1px 5px;
@@ -427,9 +483,21 @@
     .card-cover {
       width: 100%;
       min-width: 0;
-      aspect-ratio: 3 / 2;
+      aspect-ratio: auto;
       border-right: 0;
       border-bottom: 1px solid var(--border);
+    }
+
+    .card-cover-link {
+      width: 100%;
+      min-width: 0;
+      border-right: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-cover-link .card-cover {
+      max-height: none;
+      border-bottom: 0;
     }
 
     .sort-control { width: 100%; }
@@ -479,9 +547,11 @@
       <p>作家名を入力して検索すると<br>小説の作品一覧とあらすじが表示されます。</p>
     </div>
   </div>
+
+  <div class="pagination hidden" id="pagination"></div>
 </main>
 
-<footer class="site-version">ver.8</footer>
+<footer class="site-version">ver.9</footer>
 
 <script>
 // Rakuten Web ServiceのapplicationIdとaccessKeyを入れると実データ検索になります。
@@ -555,11 +625,16 @@ const statusBar = document.getElementById("statusBar");
 const statusAuthor = document.getElementById("statusAuthor");
 const statusCount = document.getElementById("statusCount");
 const sortSelect = document.getElementById("sortSelect");
+const pagination = document.getElementById("pagination");
 const apiNote = document.getElementById("apiNote");
 
+const ITEMS_PER_PAGE = 30;
 let currentBooks = [];
 let currentQuery = "";
 let currentMode = "author";
+let currentPage = 1;
+let currentPageCount = 1;
+let currentTotalCount = 0;
 
 if (!APP_ID || !ACCESS_KEY) {
   apiNote.classList.remove("hidden");
@@ -572,7 +647,21 @@ searchInput.addEventListener("keydown", event => {
 });
 sortSelect.addEventListener("change", () => {
   if (currentBooks.length === 0) return;
-  render(currentQuery, currentBooks, currentMode);
+  render(currentQuery, currentBooks, currentMode, {
+    page: currentPage,
+    pageCount: currentPageCount,
+    totalCount: currentTotalCount
+  });
+});
+
+pagination.addEventListener("click", event => {
+  const button = event.target.closest(".page-btn");
+  if (!button || button.disabled) return;
+
+  const page = Number(button.dataset.page);
+  if (!page || page === currentPage) return;
+
+  goToPage(page);
 });
 
 updateSearchPlaceholder();
@@ -616,13 +705,16 @@ function doSearch() {
 async function doAuthorSearch() {
   const author = searchInput.value.trim();
   if (!author) return;
+  currentPage = 1;
 
   showLoading();
   searchBtn.disabled = true;
 
   try {
-    const books = APP_ID && ACCESS_KEY ? await fetchRakuten(author) : getDemoData(author);
-    render(author, books, "author");
+    const result = APP_ID && ACCESS_KEY
+      ? await fetchRakuten(author, currentPage)
+      : paginateBooks(getDemoData(author), currentPage);
+    render(author, result.books, "author", result);
   } catch (error) {
     showError(error.message || "検索に失敗しました。");
   } finally {
@@ -633,14 +725,16 @@ async function doAuthorSearch() {
 async function doSynopsisSearch() {
   const keyword = searchInput.value.trim();
   if (!keyword) return;
+  currentPage = 1;
 
   showLoading();
   searchBtn.disabled = true;
 
   try {
-    const sourceBooks = APP_ID && ACCESS_KEY ? await fetchRakutenByKeyword(keyword) : getAllDemoData();
-    const books = filterBooksBySynopsis(sourceBooks, keyword);
-    render(keyword, books, "synopsis");
+    const result = APP_ID && ACCESS_KEY
+      ? await fetchRakutenByKeyword(keyword, currentPage)
+      : paginateBooks(filterBooksBySynopsis(getAllDemoData(), keyword), currentPage);
+    render(keyword, result.books, "synopsis", result);
   } catch (error) {
     showError(error.message || "検索に失敗しました。");
   } finally {
@@ -648,13 +742,40 @@ async function doSynopsisSearch() {
   }
 }
 
-async function fetchRakuten(author) {
+async function goToPage(page) {
+  const query = currentQuery;
+  if (!query) return;
+
+  currentPage = page;
+  showLoading();
+  searchBtn.disabled = true;
+
+  try {
+    const result = currentMode === "synopsis"
+      ? (APP_ID && ACCESS_KEY
+        ? await fetchRakutenByKeyword(query, currentPage)
+        : paginateBooks(filterBooksBySynopsis(getAllDemoData(), query), currentPage))
+      : (APP_ID && ACCESS_KEY
+        ? await fetchRakuten(query, currentPage)
+        : paginateBooks(getDemoData(query), currentPage));
+
+    render(query, result.books, currentMode, result);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (error) {
+    showError(error.message || "検索に失敗しました。");
+  } finally {
+    searchBtn.disabled = false;
+  }
+}
+
+async function fetchRakuten(author, page = 1) {
   const params = new URLSearchParams({
     applicationId: APP_ID,
     accessKey: ACCESS_KEY,
     author,
     booksGenreId: "001004",
     hits: "30",
+    page: String(page),
     format: "json"
   });
 
@@ -683,25 +804,22 @@ async function fetchRakuten(author) {
     throw new Error(formatRakutenError(apiError));
   }
 
-  return (data.Items || []).map(({ Item }) => ({
-    title: Item.title,
-    author: Item.author,
-    publisher: Item.publisherName,
-    publishedDate: Item.salesDate,
-    price: Item.itemPrice,
-    synopsis: Item.itemCaption || "あらすじは登録されていません。",
-    url: Item.affiliateUrl || Item.itemUrl,
-    image: Item.largeImageUrl || Item.mediumImageUrl || ""
-  }));
+  return {
+    books: normalizeRakutenItems(data),
+    page: Number(data.page || page),
+    pageCount: Number(data.pageCount || 1),
+    totalCount: Number(data.count || 0)
+  };
 }
 
-async function fetchRakutenByKeyword(keyword) {
+async function fetchRakutenByKeyword(keyword, page = 1) {
   const params = new URLSearchParams({
     applicationId: APP_ID,
     accessKey: ACCESS_KEY,
     keyword,
     booksGenreId: "001004",
     hits: "30",
+    page: String(page),
     format: "json"
   });
 
@@ -730,6 +848,17 @@ async function fetchRakutenByKeyword(keyword) {
     throw new Error(formatRakutenError(apiError));
   }
 
+  const books = normalizeRakutenItems(data).filter(book => normalizeText(book.synopsis).includes(normalizeText(keyword)));
+
+  return {
+    books,
+    page: Number(data.page || page),
+    pageCount: Number(data.pageCount || 1),
+    totalCount: Number(data.count || books.length)
+  };
+}
+
+function normalizeRakutenItems(data) {
   return (data.Items || []).map(({ Item }) => ({
     title: Item.title,
     author: Item.author,
@@ -777,18 +906,36 @@ function filterBooksBySynopsis(books, keyword) {
   return books.filter(book => normalizeText(book.synopsis).includes(normalizedKeyword));
 }
 
+function paginateBooks(books, page = 1) {
+  const pageCount = Math.max(1, Math.ceil(books.length / ITEMS_PER_PAGE));
+  const safePage = Math.min(Math.max(1, page), pageCount);
+  const start = (safePage - 1) * ITEMS_PER_PAGE;
+
+  return {
+    books: books.slice(start, start + ITEMS_PER_PAGE),
+    page: safePage,
+    pageCount,
+    totalCount: books.length
+  };
+}
+
 function normalizeText(value) {
   return String(value ?? "").toLocaleLowerCase("ja-JP");
 }
 
-function render(query, books, mode = "author") {
+function render(query, books, mode = "author", meta = {}) {
   currentBooks = books;
   currentQuery = query;
   currentMode = mode;
+  currentPage = Number(meta.page || currentPage || 1);
+  currentPageCount = Number(meta.pageCount || 1);
+  currentTotalCount = Number(meta.totalCount || books.length);
 
   statusBar.classList.remove("hidden");
   statusAuthor.textContent = mode === "synopsis" ? `あらすじ: ${query}` : query;
-  statusCount.textContent = books.length > 0 ? `${books.length}件` : "";
+  statusCount.textContent = currentTotalCount > 0
+    ? `${currentTotalCount}件中 ${getPageStart(currentPage, books.length)}-${getPageEnd(currentPage, books.length)}件`
+    : "";
 
   if (books.length === 0) {
     const emptyText = mode === "synopsis"
@@ -799,6 +946,7 @@ function render(query, books, mode = "author") {
         <span class="icon">?</span>
         <p><strong>${emptyText}</strong><br>キーワードを変えて、もう一度検索してください。</p>
       </div>`;
+    renderPagination();
     return;
   }
 
@@ -806,18 +954,18 @@ function render(query, books, mode = "author") {
   const cards = sortedBooks.map((book, index) => `
     <div class="card" style="animation-delay:${index * 0.04}s">
       ${book.image
-        ? `<a href="${escAttr(book.url)}" target="_blank" rel="noopener"><img class="card-cover" src="${escAttr(book.image)}" alt="${escAttr(book.title)}" loading="lazy"></a>`
+        ? `<a class="card-cover-link" href="${escAttr(book.url)}" target="_blank" rel="noopener"><img class="card-cover" src="${escAttr(book.image)}" alt="${escAttr(book.title)}" loading="lazy"></a>`
         : `<div class="card-cover placeholder">本</div>`}
       <div class="card-main">
         <div class="card-body">
           <div class="card-title"><a href="${escAttr(book.url)}" target="_blank" rel="noopener">${escHtml(book.title)}</a></div>
           <div class="card-meta">
-            <span><button class="author-link" type="button" data-author="${escAttr(book.author)}">${escHtml(book.author)}</button></span>
+            <span>${renderAuthorLinks(book.author)}</span>
             ${book.publisher ? `<span>${escHtml(book.publisher)}</span>` : ""}
             ${book.publishedDate ? `<span>${escHtml(book.publishedDate)}</span>` : ""}
           </div>
           <div class="card-synopsis">${escHtml(book.synopsis)}</div>
-          ${shouldShowSynopsisToggle(book.synopsis) ? `<button class="synopsis-toggle" type="button" aria-expanded="false">すべてを表示</button>` : ""}
+          <button class="synopsis-toggle hidden" type="button" aria-expanded="false">すべてを表示</button>
         </div>
         <div class="card-footer">
           <span class="price">${book.price ? `¥${Number(book.price).toLocaleString()}` : ""}</span>
@@ -828,6 +976,63 @@ function render(query, books, mode = "author") {
   `).join("");
 
   content.innerHTML = `<div class="grid">${cards}</div>`;
+  revealOverflowingSynopsisToggles();
+  renderPagination();
+}
+
+function getPageStart(page, itemCount) {
+  if (itemCount === 0) return 0;
+  return (page - 1) * ITEMS_PER_PAGE + 1;
+}
+
+function getPageEnd(page, itemCount) {
+  return (page - 1) * ITEMS_PER_PAGE + itemCount;
+}
+
+function renderPagination() {
+  if (currentPageCount <= 1) {
+    pagination.classList.add("hidden");
+    pagination.innerHTML = "";
+    return;
+  }
+
+  const pages = getVisiblePages(currentPage, currentPageCount);
+  const pageButtons = pages.map(page => {
+    if (page === "...") return `<span class="page-ellipsis">...</span>`;
+    return `<button class="page-btn${page === currentPage ? " active" : ""}" type="button" data-page="${page}" ${page === currentPage ? "disabled" : ""}>${page}</button>`;
+  }).join("");
+
+  pagination.innerHTML = `
+    <button class="page-btn" type="button" data-page="${currentPage - 1}" ${currentPage <= 1 ? "disabled" : ""}>前へ</button>
+    ${pageButtons}
+    <button class="page-btn" type="button" data-page="${currentPage + 1}" ${currentPage >= currentPageCount ? "disabled" : ""}>次へ</button>
+  `;
+  pagination.classList.remove("hidden");
+}
+
+function getVisiblePages(page, pageCount) {
+  const pages = [];
+  for (let i = 1; i <= pageCount; i += 1) {
+    if (i === 1 || i === pageCount || Math.abs(i - page) <= 2) {
+      pages.push(i);
+    } else if (pages[pages.length - 1] !== "...") {
+      pages.push("...");
+    }
+  }
+  return pages;
+}
+
+function renderAuthorLinks(author) {
+  const parts = String(author ?? "")
+    .split(/[／/]+/)
+    .map(part => part.trim())
+    .filter(Boolean);
+
+  if (parts.length === 0) return "";
+
+  return parts
+    .map(part => `<button class="author-link" type="button" data-author="${escAttr(part)}">${escHtml(part)}</button>`)
+    .join(" / ");
 }
 
 function sortBooksByDate(books, order) {
@@ -855,6 +1060,8 @@ function getDateValue(value) {
 
 function showLoading() {
   statusBar.classList.add("hidden");
+  pagination.classList.add("hidden");
+  pagination.innerHTML = "";
   content.innerHTML = `
     <div class="state-box">
       <div class="loading-dots" style="margin-bottom:16px">
@@ -866,6 +1073,8 @@ function showLoading() {
 
 function showError(message) {
   statusBar.classList.add("hidden");
+  pagination.classList.add("hidden");
+  pagination.innerHTML = "";
   content.innerHTML = `
     <div class="state-box">
       <span class="icon">!</span>
@@ -873,8 +1082,14 @@ function showError(message) {
     </div>`;
 }
 
-function shouldShowSynopsisToggle(synopsis) {
-  return String(synopsis ?? "").length > 90;
+function revealOverflowingSynopsisToggles() {
+  document.querySelectorAll(".card-synopsis").forEach(synopsis => {
+    const toggle = synopsis.nextElementSibling;
+    if (!toggle?.classList.contains("synopsis-toggle")) return;
+
+    const isOverflowing = synopsis.scrollHeight > synopsis.clientHeight + 1;
+    toggle.classList.toggle("hidden", !isOverflowing);
+  });
 }
 
 function escHtml(value) {
