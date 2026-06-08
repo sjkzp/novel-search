@@ -56,14 +56,6 @@
 
   .logo span { color: var(--accent); }
 
-  .search-area {
-    display: flex;
-    flex: 1;
-    gap: 10px;
-    min-width: 280px;
-    flex-wrap: wrap;
-  }
-
   .search-row {
     display: flex;
     gap: 8px;
@@ -71,22 +63,9 @@
     min-width: 280px;
   }
 
-  .search-group {
-    display: flex;
-    flex: 1;
-    min-width: 280px;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .search-label {
-    color: #d9cfc2;
-    font-family: "Zen Kaku Gothic New", sans-serif;
-    font-size: 0.72rem;
-    font-weight: 700;
-  }
-
-  .search-input {
+  .search-input,
+  .search-select,
+  .sort-select {
     flex: 1;
     min-width: 0;
     padding: 10px 16px;
@@ -100,8 +79,15 @@
     transition: border-color 0.2s;
   }
 
+  .search-select {
+    flex: 0 0 150px;
+    cursor: pointer;
+  }
+
   .search-input::placeholder { color: #b79f88; }
   .search-input:focus { border-color: var(--accent); }
+  .search-select:focus,
+  .sort-select:focus { border-color: var(--accent); }
 
   .search-btn {
     padding: 10px 22px;
@@ -129,11 +115,12 @@
 
   .status-bar {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 12px;
     margin-bottom: 24px;
     padding-bottom: 16px;
     border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
   }
 
   .status-author {
@@ -147,12 +134,36 @@
     color: var(--muted);
   }
 
+  .status-spacer {
+    flex: 1;
+    min-width: 16px;
+  }
+
+  .sort-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  .sort-select {
+    flex: 0 0 auto;
+    min-width: 150px;
+    padding: 7px 10px;
+    background: var(--card-bg);
+    border-color: var(--border);
+    color: var(--ink);
+    cursor: pointer;
+  }
+
   .hidden { display: none !important; }
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .card {
@@ -161,7 +172,9 @@
     border-radius: 6px;
     overflow: hidden;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    min-height: 220px;
+    min-width: 0;
     transition: box-shadow 0.2s, transform 0.2s;
     animation: fadeIn 0.3s ease both;
   }
@@ -177,12 +190,13 @@
   }
 
   .card-cover {
-    width: 100%;
-    aspect-ratio: 3 / 2;
+    width: 180px;
+    min-width: 180px;
+    aspect-ratio: auto;
     object-fit: cover;
     background: var(--cream);
     display: block;
-    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
   }
 
   .card-cover.placeholder {
@@ -191,6 +205,13 @@
     justify-content: center;
     font-size: 2.5rem;
     color: var(--border);
+  }
+
+  .card-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
   }
 
   .card-body {
@@ -395,11 +416,23 @@
     }
 
     .logo { font-size: 1.2rem; }
-    .search-area,
-    .search-row,
-    .search-group { min-width: 100%; }
+    .search-row { min-width: 100%; flex-wrap: wrap; }
+    .search-select { flex: 1 1 100%; }
     main { padding: 20px 16px 48px; }
-    .grid { grid-template-columns: 1fr; }
+    .card {
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .card-cover {
+      width: 100%;
+      min-width: 0;
+      aspect-ratio: 3 / 2;
+      border-right: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sort-control { width: 100%; }
   }
 </style>
 </head>
@@ -407,21 +440,13 @@
 <header>
   <div class="header-inner">
     <div class="logo">あらすじ<span>検索</span></div>
-    <div class="search-area">
-      <div class="search-group">
-        <label class="search-label" for="authorInput">作家名で検索</label>
-        <div class="search-row">
-          <input class="search-input" id="authorInput" type="text" placeholder="例：東野圭吾" autocomplete="off">
-          <button class="search-btn" id="authorSearchBtn" type="button">検索</button>
-        </div>
-      </div>
-      <div class="search-group">
-        <label class="search-label" for="synopsisInput">あらすじで検索</label>
-        <div class="search-row">
-          <input class="search-input" id="synopsisInput" type="text" placeholder="例：事件、青春、復讐" autocomplete="off">
-          <button class="search-btn" id="synopsisSearchBtn" type="button">検索</button>
-        </div>
-      </div>
+    <div class="search-row">
+      <select class="search-select" id="searchMode" aria-label="検索種別">
+        <option value="author">作家で検索</option>
+        <option value="synopsis">あらすじで検索</option>
+      </select>
+      <input class="search-input" id="searchInput" type="text" placeholder="作家名を入力　例：東野圭吾" autocomplete="off">
+      <button class="search-btn" id="searchBtn" type="button">検索</button>
     </div>
   </div>
 </header>
@@ -438,6 +463,14 @@
   <div class="status-bar hidden" id="statusBar">
     <span class="status-author" id="statusAuthor"></span>
     <span class="status-count" id="statusCount"></span>
+    <span class="status-spacer"></span>
+    <label class="sort-control">
+      並び順
+      <select class="sort-select" id="sortSelect">
+        <option value="date-desc">年月日 降順</option>
+        <option value="date-asc">年月日 昇順</option>
+      </select>
+    </label>
   </div>
 
   <div id="content">
@@ -448,7 +481,7 @@
   </div>
 </main>
 
-<footer class="site-version">ver.5</footer>
+<footer class="site-version">ver.7</footer>
 
 <script>
 // Rakuten Web ServiceのapplicationIdとaccessKeyを入れると実データ検索になります。
@@ -514,34 +547,43 @@ const DEMO_DATA = {
   ]
 };
 
-const authorInput = document.getElementById("authorInput");
-const synopsisInput = document.getElementById("synopsisInput");
-const authorSearchBtn = document.getElementById("authorSearchBtn");
-const synopsisSearchBtn = document.getElementById("synopsisSearchBtn");
+const searchMode = document.getElementById("searchMode");
+const searchInput = document.getElementById("searchInput");
+const searchBtn = document.getElementById("searchBtn");
 const content = document.getElementById("content");
 const statusBar = document.getElementById("statusBar");
 const statusAuthor = document.getElementById("statusAuthor");
 const statusCount = document.getElementById("statusCount");
+const sortSelect = document.getElementById("sortSelect");
 const apiNote = document.getElementById("apiNote");
+
+let currentBooks = [];
+let currentQuery = "";
+let currentMode = "author";
 
 if (!APP_ID || !ACCESS_KEY) {
   apiNote.classList.remove("hidden");
 }
 
-authorSearchBtn.addEventListener("click", doAuthorSearch);
-synopsisSearchBtn.addEventListener("click", doSynopsisSearch);
-authorInput.addEventListener("keydown", event => {
-  if (event.key === "Enter") doAuthorSearch();
+searchMode.addEventListener("change", updateSearchPlaceholder);
+searchBtn.addEventListener("click", doSearch);
+searchInput.addEventListener("keydown", event => {
+  if (event.key === "Enter") doSearch();
 });
-synopsisInput.addEventListener("keydown", event => {
-  if (event.key === "Enter") doSynopsisSearch();
+sortSelect.addEventListener("change", () => {
+  if (currentBooks.length === 0) return;
+  render(currentQuery, currentBooks, currentMode);
 });
+
+updateSearchPlaceholder();
 
 content.addEventListener("click", event => {
   const authorLink = event.target.closest(".author-link");
   if (authorLink) {
-    authorInput.value = authorLink.dataset.author || authorLink.textContent.trim();
-    doAuthorSearch();
+    searchMode.value = "author";
+    searchInput.value = authorLink.dataset.author || authorLink.textContent.trim();
+    updateSearchPlaceholder();
+    doSearch();
     window.scrollTo({ top: 0, behavior: "smooth" });
     return;
   }
@@ -556,12 +598,27 @@ content.addEventListener("click", event => {
   toggle.textContent = expanded ? "すべてを表示" : "閉じる";
 });
 
+function updateSearchPlaceholder() {
+  searchInput.placeholder = searchMode.value === "synopsis"
+    ? "あらすじのキーワードを入力　例：事件、青春、復讐"
+    : "作家名を入力　例：東野圭吾";
+}
+
+function doSearch() {
+  if (searchMode.value === "synopsis") {
+    doSynopsisSearch();
+    return;
+  }
+
+  doAuthorSearch();
+}
+
 async function doAuthorSearch() {
-  const author = authorInput.value.trim();
+  const author = searchInput.value.trim();
   if (!author) return;
 
   showLoading();
-  authorSearchBtn.disabled = true;
+  searchBtn.disabled = true;
 
   try {
     const books = APP_ID && ACCESS_KEY ? await fetchRakuten(author) : getDemoData(author);
@@ -569,16 +626,16 @@ async function doAuthorSearch() {
   } catch (error) {
     showError(error.message || "検索に失敗しました。");
   } finally {
-    authorSearchBtn.disabled = false;
+    searchBtn.disabled = false;
   }
 }
 
 async function doSynopsisSearch() {
-  const keyword = synopsisInput.value.trim();
+  const keyword = searchInput.value.trim();
   if (!keyword) return;
 
   showLoading();
-  synopsisSearchBtn.disabled = true;
+  searchBtn.disabled = true;
 
   try {
     const sourceBooks = APP_ID && ACCESS_KEY ? await fetchRakutenByKeyword(keyword) : getAllDemoData();
@@ -587,7 +644,7 @@ async function doSynopsisSearch() {
   } catch (error) {
     showError(error.message || "検索に失敗しました。");
   } finally {
-    synopsisSearchBtn.disabled = false;
+    searchBtn.disabled = false;
   }
 }
 
@@ -725,6 +782,10 @@ function normalizeText(value) {
 }
 
 function render(query, books, mode = "author") {
+  currentBooks = books;
+  currentQuery = query;
+  currentMode = mode;
+
   statusBar.classList.remove("hidden");
   statusAuthor.textContent = mode === "synopsis" ? `あらすじ: ${query}` : query;
   statusCount.textContent = books.length > 0 ? `${books.length}件` : "";
@@ -741,29 +802,55 @@ function render(query, books, mode = "author") {
     return;
   }
 
-  const cards = books.map((book, index) => `
+  const sortedBooks = sortBooksByDate(books, sortSelect.value);
+  const cards = sortedBooks.map((book, index) => `
     <div class="card" style="animation-delay:${index * 0.04}s">
       ${book.image
         ? `<img class="card-cover" src="${escAttr(book.image)}" alt="${escAttr(book.title)}" loading="lazy">`
         : `<div class="card-cover placeholder">本</div>`}
-      <div class="card-body">
-        <div class="card-title">${escHtml(book.title)}</div>
-        <div class="card-meta">
-          <span><button class="author-link" type="button" data-author="${escAttr(book.author)}">${escHtml(book.author)}</button></span>
-          ${book.publisher ? `<span>${escHtml(book.publisher)}</span>` : ""}
-          ${book.publishedDate ? `<span>${escHtml(book.publishedDate)}</span>` : ""}
+      <div class="card-main">
+        <div class="card-body">
+          <div class="card-title">${escHtml(book.title)}</div>
+          <div class="card-meta">
+            <span><button class="author-link" type="button" data-author="${escAttr(book.author)}">${escHtml(book.author)}</button></span>
+            ${book.publisher ? `<span>${escHtml(book.publisher)}</span>` : ""}
+            ${book.publishedDate ? `<span>${escHtml(book.publishedDate)}</span>` : ""}
+          </div>
+          <div class="card-synopsis">${escHtml(book.synopsis)}</div>
+          ${shouldShowSynopsisToggle(book.synopsis) ? `<button class="synopsis-toggle" type="button" aria-expanded="false">すべてを表示</button>` : ""}
         </div>
-        <div class="card-synopsis">${escHtml(book.synopsis)}</div>
-        ${shouldShowSynopsisToggle(book.synopsis) ? `<button class="synopsis-toggle" type="button" aria-expanded="false">すべてを表示</button>` : ""}
-      </div>
-      <div class="card-footer">
-        <span class="price">${book.price ? `¥${Number(book.price).toLocaleString()}` : ""}</span>
-        <a class="buy-btn" href="${escAttr(book.url)}" target="_blank" rel="noopener">楽天で見る</a>
+        <div class="card-footer">
+          <span class="price">${book.price ? `¥${Number(book.price).toLocaleString()}` : ""}</span>
+          <a class="buy-btn" href="${escAttr(book.url)}" target="_blank" rel="noopener">楽天で見る</a>
+        </div>
       </div>
     </div>
   `).join("");
 
   content.innerHTML = `<div class="grid">${cards}</div>`;
+}
+
+function sortBooksByDate(books, order) {
+  const direction = order === "date-asc" ? 1 : -1;
+  return [...books].sort((a, b) => {
+    const dateA = getDateValue(a.publishedDate);
+    const dateB = getDateValue(b.publishedDate);
+    if (dateA === dateB) return 0;
+    if (dateA === Number.NEGATIVE_INFINITY) return 1;
+    if (dateB === Number.NEGATIVE_INFINITY) return -1;
+    return (dateA - dateB) * direction;
+  });
+}
+
+function getDateValue(value) {
+  const text = String(value ?? "");
+  const match = text.match(/(\d{4})(?:[-/.年](\d{1,2}))?(?:[-/.月](\d{1,2}))?/);
+  if (!match) return Number.NEGATIVE_INFINITY;
+
+  const year = Number(match[1]);
+  const month = Number(match[2] || 1);
+  const day = Number(match[3] || 1);
+  return new Date(year, month - 1, day).getTime();
 }
 
 function showLoading() {
