@@ -362,6 +362,8 @@
 </main>
 
 <script>
+// Rakuten Web Serviceの有効なapplicationIdを入れると実データ検索になります。
+// wrong_parameterが出る場合は、楽天Webサービス側で有効なapplicationIdか確認してください。
 const APP_ID = "d77d6759-3260-43eb-81b7-fd153a98e8ba";
 const AFFILIATE_ID = "54aa3625.ee1bf9ab.54aa3626.b59c4a5f";
 
@@ -479,7 +481,13 @@ function fetchRakutenJSONP(author) {
     window[callbackName] = data => {
       cleanup();
       if (data.error) {
-        reject(new Error(`${data.error}: ${data.error_description || ""}`));
+        const description = data.error_description || "";
+        if (data.error === "wrong_parameter" && description.includes("applicationId")) {
+          reject(new Error("楽天APIのapplicationIdが無効です。楽天Webサービスで取得した有効なapplicationIdをAPP_IDに設定してください。"));
+          return;
+        }
+
+        reject(new Error(`${data.error}: ${description}`));
         return;
       }
 
