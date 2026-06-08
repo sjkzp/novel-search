@@ -1,8 +1,4 @@
-﻿// Rakuten Web ServiceのapplicationIdとaccessKeyを入れると実データ検索になります。
-// ACCESS_KEYが空のままなら下のサンプルデータで動きます。
-const APP_ID = "d77d6759-3260-43eb-81b7-fd153a98e8ba";
-const ACCESS_KEY = "pk_cZyQUwzuxXMcTXs6gq5JaFSDLmIQTKkRZWxmU2mXnsz";
-const AFFILIATE_ID = "54aa3625.ee1bf9ab.54aa3626.b59c4a5f";
+﻿const API_BASE_URL = "https://rakuten-books-proxy.cgm4s70.workers.dev";
 
 const DEMO_DATA = {
   "東野圭吾": [
@@ -81,10 +77,6 @@ let currentPage = 1;
 let currentPageCount = 1;
 let currentTotalCount = 0;
 let currentGenreSelection = null;
-
-if (!APP_ID || !ACCESS_KEY) {
-  apiNote.classList.remove("hidden");
-}
 
 searchMode.addEventListener("change", updateSearchPlaceholder);
 searchBtn.addEventListener("click", doSearch);
@@ -171,9 +163,7 @@ async function doAuthorSearch() {
   searchBtn.disabled = true;
 
   try {
-    const result = APP_ID && ACCESS_KEY
-      ? await fetchRakuten(author, currentPage)
-      : paginateBooks(getDemoData(author), currentPage);
+    const result = await fetchRakuten(author, currentPage);
     render(author, result.books, "author", result);
   } catch (error) {
     showError(error.message || "検索に失敗しました。");
@@ -192,9 +182,7 @@ async function doSynopsisSearch() {
   searchBtn.disabled = true;
 
   try {
-    const result = APP_ID && ACCESS_KEY
-      ? await fetchRakutenByKeyword(keyword, currentPage)
-      : paginateBooks(filterBooksBySynopsis(getAllDemoData(), keyword), currentPage);
+    const result = await fetchRakutenByKeyword(keyword, currentPage);
     render(keyword, result.books, "synopsis", result);
   } catch (error) {
     showError(error.message || "検索に失敗しました。");
@@ -213,12 +201,8 @@ async function goToPage(page) {
 
   try {
     const result = currentMode === "synopsis"
-      ? (APP_ID && ACCESS_KEY
-        ? await fetchRakutenByKeyword(query, currentPage)
-        : paginateBooks(filterBooksBySynopsis(getAllDemoData(), query), currentPage))
-      : (APP_ID && ACCESS_KEY
-        ? await fetchRakuten(query, currentPage)
-        : paginateBooks(getDemoData(query), currentPage));
+      ? await fetchRakutenByKeyword(query, currentPage)
+      : await fetchRakuten(query, currentPage);
 
     render(query, result.books, currentMode, result);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -231,25 +215,16 @@ async function goToPage(page) {
 
 async function fetchRakuten(author, page = 1) {
   const params = new URLSearchParams({
-    applicationId: APP_ID,
-    accessKey: ACCESS_KEY,
-    author,
-    hits: "30",
-    page: String(page),
-    format: "json"
+    mode: "author",
+    q: author,
+    page: String(page)
   });
-
-  if (AFFILIATE_ID) params.set("affiliateId", AFFILIATE_ID);
 
   let response;
   try {
-    response = await fetch(`https://openapi.rakuten.co.jp/services/api/BooksBook/Search/20170404?${params.toString()}`, {
-      method: "GET",
-      mode: "cors",
-      referrerPolicy: "strict-origin-when-cross-origin"
-    });
+    response = await fetch(`${API_BASE_URL}/search?${params.toString()}`);
   } catch (error) {
-    throw new Error("楽天APIに接続できませんでした。アップロード先のURLを楽天Webサービスのアプリ設定で許可済みWebサイトに登録してください。file://で直接開いている場合は実API検索できません。");
+    throw new Error("検索APIに接続できませんでした。Worker URLやCloudflareの設定を確認してください。");
   }
 
   const data = await response.json().catch(() => null);
@@ -274,26 +249,16 @@ async function fetchRakuten(author, page = 1) {
 
 async function fetchRakutenByKeyword(keyword, page = 1) {
   const params = new URLSearchParams({
-    applicationId: APP_ID,
-    accessKey: ACCESS_KEY,
-    keyword,
-    booksGenreId: "001004",
-    hits: "30",
-    page: String(page),
-    format: "json"
+    mode: "synopsis",
+    q: keyword,
+    page: String(page)
   });
-
-  if (AFFILIATE_ID) params.set("affiliateId", AFFILIATE_ID);
 
   let response;
   try {
-    response = await fetch(`https://openapi.rakuten.co.jp/services/api/BooksTotal/Search/20170404?${params.toString()}`, {
-      method: "GET",
-      mode: "cors",
-      referrerPolicy: "strict-origin-when-cross-origin"
-    });
+    response = await fetch(`${API_BASE_URL}/search?${params.toString()}`);
   } catch (error) {
-    throw new Error("楽天APIに接続できませんでした。アップロード先のURLを楽天Webサービスのアプリ設定で許可済みWebサイトに登録してください。file://で直接開いている場合は実API検索できません。");
+    throw new Error("検索APIに接続できませんでした。Worker URLやCloudflareの設定を確認してください。");
   }
 
   const data = await response.json().catch(() => null);
@@ -355,11 +320,11 @@ function formatRakutenError(message) {
   }
 
   if (text.includes("applicationId")) {
-    return "楽天APIのapplicationIdが無効です。楽天Webサービスで取得した有効なapplicationIdをAPP_IDに設定してください。";
+    return "楽天APIのapplicationIdが無効です。Cloudflare WorkerのRAKUTEN_APP_IDを確認してください。";
   }
 
   if (text.includes("accessKey")) {
-    return "楽天APIのaccessKeyが無効です。楽天Webサービスで取得した有効なaccessKeyをACCESS_KEYに設定してください。";
+    return "楽天APIのaccessKeyが無効です。Cloudflare WorkerのRAKUTEN_ACCESS_KEYを確認してください。";
   }
 
   return text || "楽天APIの呼び出しに失敗しました。";
