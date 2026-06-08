@@ -308,7 +308,7 @@ async function fetchRakutenByKeyword(keyword, page = 1) {
     throw new Error(formatRakutenError(apiError));
   }
 
-  const books = normalizeRakutenItems(data).filter(book => normalizeText(book.synopsis).includes(normalizeText(keyword)));
+  const books = filterBooksBySynopsis(normalizeRakutenItems(data), keyword);
 
   return {
     books,
@@ -375,8 +375,20 @@ function getAllDemoData() {
 }
 
 function filterBooksBySynopsis(books, keyword) {
-  const normalizedKeyword = normalizeText(keyword);
-  return books.filter(book => normalizeText(book.synopsis).includes(normalizedKeyword));
+  const words = getSearchWords(keyword);
+  if (words.length === 0) return books;
+
+  return books.filter(book => {
+    const synopsis = normalizeText(book.synopsis);
+    return words.every(word => synopsis.includes(word));
+  });
+}
+
+function getSearchWords(keyword) {
+  return normalizeText(keyword)
+    .split(/\s+/)
+    .map(word => word.trim())
+    .filter(Boolean);
 }
 
 function paginateBooks(books, page = 1) {
