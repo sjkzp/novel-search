@@ -445,7 +445,7 @@
         <option value="author">作家で検索</option>
         <option value="synopsis">あらすじで検索</option>
       </select>
-      <input class="search-input" id="searchInput" type="text" placeholder="作家名を入力　例：東野圭吾" autocomplete="off">
+      <input class="search-input" id="searchInput" type="text" placeholder="作家名を入力" autocomplete="off">
       <button class="search-btn" id="searchBtn" type="button">検索</button>
     </div>
   </div>
@@ -481,7 +481,7 @@
   </div>
 </main>
 
-<footer class="site-version">ver.7</footer>
+<footer class="site-version">ver.8</footer>
 
 <script>
 // Rakuten Web ServiceのapplicationIdとaccessKeyを入れると実データ検索になります。
@@ -806,11 +806,11 @@ function render(query, books, mode = "author") {
   const cards = sortedBooks.map((book, index) => `
     <div class="card" style="animation-delay:${index * 0.04}s">
       ${book.image
-        ? `<img class="card-cover" src="${escAttr(book.image)}" alt="${escAttr(book.title)}" loading="lazy">`
+        ? `<a href="${escAttr(book.url)}" target="_blank" rel="noopener"><img class="card-cover" src="${escAttr(book.image)}" alt="${escAttr(book.title)}" loading="lazy"></a>`
         : `<div class="card-cover placeholder">本</div>`}
       <div class="card-main">
         <div class="card-body">
-          <div class="card-title">${escHtml(book.title)}</div>
+          <div class="card-title"><a href="${escAttr(book.url)}" target="_blank" rel="noopener">${escHtml(book.title)}</a></div>
           <div class="card-meta">
             <span><button class="author-link" type="button" data-author="${escAttr(book.author)}">${escHtml(book.author)}</button></span>
             ${book.publisher ? `<span>${escHtml(book.publisher)}</span>` : ""}
