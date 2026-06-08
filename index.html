@@ -40,8 +40,8 @@
       <label class="sort-control">
         並び順
         <select class="sort-select" id="sortSelect">
-          <option value="date-desc">年月日 降順</option>
-          <option value="date-asc">年月日 昇順</option>
+          <option value="date-desc">発売日 降順</option>
+          <option value="date-asc">発売日 昇順</option>
         </select>
       </label>
       <div class="genre-filter hidden" id="genreFilter"></div>
@@ -52,31 +52,29 @@
     <div class="home-hero">
       <section class="hero-copy" aria-labelledby="heroTitle">
         <p class="hero-kicker">Novel Synopsis Finder</p>
-        <h1 id="heroTitle">好きな作家のあらすじ一覧も、気になるキーワード検索も。</h1>
-        <p class="hero-lead">作家名から作品をまとめて探したり、物語のキーワードからあらすじを横断検索したり。発売日順の並び替えにも対応しています。</p>
-        <div class="quick-searches" aria-label="おすすめ検索">
-          <button class="quick-search" type="button"></button>
-          <button class="quick-search" type="button"></button>
-          <button class="quick-search" type="button"></button>
-          <button class="quick-search" type="button"></button>
+        <h1 id="heroTitle">読みたい一冊は、あらすじの中に隠れている。</h1>
+        <p class="hero-lead">好きな作家の作品を一覧で眺める。気になる言葉から物語を探す。タイトルを知らなくても、読みたい気分から小説に出会える検索サイトです。</p>
+        <div class="quick-search-panel" aria-label="おすすめ検索">
+          <div class="quick-search-group">
+            <h2>作家名で検索</h2>
+            <div class="quick-searches" data-quick-group="author">
+              <button class="quick-search" type="button"></button>
+              <button class="quick-search" type="button"></button>
+            </div>
+          </div>
+          <div class="quick-search-group">
+            <h2>キーワードであらすじ検索</h2>
+            <div class="quick-searches" data-quick-group="synopsis">
+              <button class="quick-search" type="button"></button>
+              <button class="quick-search" type="button"></button>
+            </div>
+          </div>
         </div>
       </section>
-      <section class="shelf-visual" aria-label="検索できる小説のイメージ">
-        <div class="book-tile tile-large">
-          <span class="tile-label">Author</span>
-          <strong>作家で探す</strong>
-          <small>シリーズも発売日順に</small>
-        </div>
-        <div class="book-tile tile-red">
-          <span class="tile-label">Synopsis</span>
-          <strong>あらすじ検索</strong>
-          <small>複数語はAND検索</small>
-        </div>
-        <div class="book-tile tile-green">
-          <span class="tile-label">Sort</span>
-          <strong>発売日順に整理</strong>
-          <small>新しい順・古い順で比較</small>
-        </div>
+      <section class="hero-note" aria-label="サイトの特徴">
+        <p>作家名で一覧化</p>
+        <p>あらすじを横断検索</p>
+        <p>発売日順で整理</p>
       </section>
     </div>
   </div>
@@ -84,7 +82,7 @@
   <div class="pagination hidden" id="pagination"></div>
 </main>
 
-<footer class="site-version">ver.17</footer>
+<footer class="site-version">ver.18</footer>
 
 <script src="app.js"></script>
 </body>

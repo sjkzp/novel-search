@@ -185,24 +185,24 @@ function updateSearchPlaceholder() {
 }
 
 function setupQuickSearches() {
-  const buttons = [...document.querySelectorAll(".quick-search")];
-  if (buttons.length === 0) return;
+  setQuickSearchGroup("author", pickRandomItems(FEATURED_AUTHORS, 2));
+  setQuickSearchGroup("synopsis", pickRandomItems(FEATURED_KEYWORDS, 2));
+}
 
-  const items = [
-    ...pickRandomItems(FEATURED_AUTHORS, 2).map(query => ({ mode: "author", query })),
-    ...pickRandomItems(FEATURED_KEYWORDS, 2).map(query => ({ mode: "synopsis", query }))
-  ];
+function setQuickSearchGroup(mode, queries) {
+  const group = document.querySelector(`[data-quick-group="${mode}"]`);
+  if (!group) return;
 
-  buttons.forEach((button, index) => {
-    const item = items[index];
-    if (!item) {
+  [...group.querySelectorAll(".quick-search")].forEach((button, index) => {
+    const query = queries[index];
+    if (!query) {
       button.remove();
       return;
     }
 
-    button.dataset.mode = item.mode;
-    button.dataset.query = item.query;
-    button.textContent = item.query;
+    button.dataset.mode = mode;
+    button.dataset.query = query;
+    button.textContent = query;
   });
 }
 
