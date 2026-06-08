@@ -1,0 +1,580 @@
+﻿:root {
+    --ink: #1a1008;
+    --paper: #f5f0e8;
+    --cream: #ede8dc;
+    --accent: #c0392b;
+    --accent2: #e67e22;
+    --muted: #7a6f62;
+    --border: #c8b99a;
+    --card-bg: #faf7f2;
+    --shadow: rgba(26, 16, 8, 0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Shippori Mincho", serif;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--ink);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid var(--accent);
+  }
+
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .logo {
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-weight: 900;
+    font-size: 1.5rem;
+    color: var(--paper);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .search-row {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+    min-width: 280px;
+  }
+
+  .search-input,
+  .search-select,
+  .sort-select {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 16px;
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-size: 1rem;
+    background: #2a1f14;
+    border: 1px solid #4a3828;
+    border-radius: 4px;
+    color: var(--paper);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-select {
+    flex: 0 0 150px;
+    cursor: pointer;
+  }
+
+  .search-input::placeholder { color: #b79f88; }
+  .search-input:focus { border-color: var(--accent); }
+  .search-select:focus,
+  .sort-select:focus { border-color: var(--accent); }
+
+  .search-btn {
+    padding: 10px 22px;
+    background: var(--accent);
+    color: #fff;
+    border: 0;
+    border-radius: 4px;
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, transform 0.1s;
+  }
+
+  .search-btn:hover { background: #a93226; }
+  .search-btn:active { transform: scale(0.97); }
+  .search-btn:disabled { cursor: wait; opacity: 0.75; }
+
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+  }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .status-author {
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+  }
+
+  .status-count {
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  .status-spacer {
+    flex: 1;
+    min-width: 16px;
+  }
+
+  .sort-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  .sort-select {
+    flex: 0 0 auto;
+    min-width: 150px;
+    padding: 7px 10px;
+    background: var(--card-bg);
+    border-color: var(--border);
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  .result-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .genre-filter {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px 12px;
+    flex-wrap: wrap;
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .genre-filter-title {
+    font-weight: 700;
+  }
+
+  .genre-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .hidden { display: none !important; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    min-height: 220px;
+    min-width: 0;
+    transition: box-shadow 0.2s, transform 0.2s;
+    animation: fadeIn 0.3s ease both;
+  }
+
+  .card:hover {
+    box-shadow: 0 6px 24px var(--shadow);
+    transform: translateY(-2px);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-cover {
+    width: 180px;
+    min-width: 180px;
+    aspect-ratio: auto;
+    object-fit: contain;
+    background: var(--cream);
+    display: block;
+    border-right: 1px solid var(--border);
+  }
+
+  .card-cover-link {
+    width: 180px;
+    min-width: 180px;
+    display: flex;
+    background: var(--cream);
+    border-right: 1px solid var(--border);
+  }
+
+  .card-cover-link .card-cover {
+    width: 100%;
+    min-width: 0;
+    border-right: 0;
+  }
+
+  .card-cover.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: var(--border);
+  }
+
+  .card-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .card-body {
+    padding: 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .card-title {
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+
+  .card-title a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .card-title a:hover {
+    color: #a93226;
+  }
+
+  .card-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .card-meta span::before {
+    content: "・";
+    margin-right: 4px;
+    opacity: 0.4;
+  }
+
+  .card-meta span:first-child::before {
+    content: "";
+    margin: 0;
+  }
+
+  .author-link {
+    background: transparent;
+    border: 0;
+    color: var(--accent);
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .author-link:hover {
+    color: #a93226;
+  }
+
+  .card-synopsis {
+    font-size: 0.88rem;
+    line-height: 1.75;
+    color: #3a2e22;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-synopsis.expanded {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+  }
+
+  .synopsis-toggle {
+    align-self: flex-start;
+    margin-top: 2px;
+    padding: 4px 0;
+    background: transparent;
+    border: 0;
+    color: var(--accent);
+    cursor: pointer;
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .synopsis-toggle:hover {
+    color: #a93226;
+  }
+
+  .synopsis-toggle.hidden {
+    display: none;
+  }
+
+  .card-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .price {
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .buy-btn {
+    display: inline-block;
+    padding: 7px 16px;
+    background: var(--accent2);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+
+  .buy-btn:hover { background: #cf6d17; }
+
+  .state-box {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--muted);
+  }
+
+  .state-box .icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .state-box p {
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+
+  .state-box strong {
+    color: var(--ink);
+    font-family: "Zen Kaku Gothic New", sans-serif;
+  }
+
+  .loading-dots span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin: 0 3px;
+    animation: bounce 1s infinite;
+  }
+
+  .loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-8px); }
+  }
+
+  .api-note {
+    background: #fff8e1;
+    border: 1px solid #f9c74f;
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 28px;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: #5a4a00;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .api-note .icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .site-version {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 24px;
+    color: var(--muted);
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-size: 0.78rem;
+    text-align: right;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+
+  .page-btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--card-bg);
+    color: var(--ink);
+    cursor: pointer;
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-weight: 700;
+  }
+
+  .page-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .page-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .page-btn:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+
+  code {
+    background: #ede8dc;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 0.9em;
+  }
+
+  @media (max-width: 600px) {
+    .header-inner {
+      padding: 14px 16px;
+      gap: 12px;
+    }
+
+    .logo { font-size: 1.2rem; }
+    .search-row { min-width: 100%; flex-wrap: wrap; }
+    .search-select { flex: 1 1 100%; }
+    main { padding: 20px 16px 48px; }
+
+    body.has-results .header-inner {
+      padding: 8px 10px;
+      gap: 6px;
+    }
+
+    body.has-results .logo {
+      font-size: 1rem;
+      width: 100%;
+    }
+
+    body.has-results .search-row {
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+
+    body.has-results .search-select {
+      flex: 0 0 108px;
+      padding: 8px 7px;
+      font-size: 0.82rem;
+    }
+
+    body.has-results .search-input {
+      padding: 8px 9px;
+      font-size: 0.9rem;
+    }
+
+    body.has-results .search-btn {
+      padding: 8px 11px;
+      font-size: 0.86rem;
+    }
+
+    body.has-results main {
+      padding-top: 14px;
+    }
+
+    .card {
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .card-cover {
+      width: 100%;
+      min-width: 0;
+      aspect-ratio: auto;
+      border-right: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-cover-link {
+      width: 100%;
+      min-width: 0;
+      border-right: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-cover-link .card-cover {
+      max-height: none;
+      border-bottom: 0;
+    }
+
+    .result-controls {
+      width: 100%;
+      align-items: stretch;
+    }
+
+    .sort-control { width: 100%; }
+
+    .genre-filter {
+      justify-content: flex-start;
+    }
+  }
