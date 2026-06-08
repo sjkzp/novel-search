@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>あらすじ検索 - 作家で探す小説</title>
+<meta name="description" content="作家名やあらすじのキーワードから小説を探せる検索ツール。発売日順、ジャンル絞り込み、全文あらすじ表示に対応。">
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -48,16 +49,42 @@
   </div>
 
   <div id="content">
-    <div class="state-box">
-      <span class="icon">⌕</span>
-      <p>作家名を入力して検索すると<br>小説の作品一覧とあらすじが表示されます。</p>
+    <div class="home-hero">
+      <section class="hero-copy" aria-labelledby="heroTitle">
+        <p class="hero-kicker">Novel Synopsis Finder</p>
+        <h1 id="heroTitle">あらすじから、次に読む小説を探す。</h1>
+        <p class="hero-lead">作家名でも、物語のキーワードでも。作品一覧、発売日順、ジャンル絞り込みを使って、読みたい本へすばやく近づけます。</p>
+        <div class="quick-searches" aria-label="おすすめ検索">
+          <button class="quick-search" type="button" data-mode="author" data-query="ひのひまり">ひのひまり</button>
+          <button class="quick-search" type="button" data-mode="author" data-query="東野圭吾">東野圭吾</button>
+          <button class="quick-search" type="button" data-mode="synopsis" data-query="猫 バイク">猫 バイク</button>
+          <button class="quick-search" type="button" data-mode="synopsis" data-query="青春 ミステリー">青春 ミステリー</button>
+        </div>
+      </section>
+      <section class="shelf-visual" aria-label="検索できる小説のイメージ">
+        <div class="book-tile tile-large">
+          <span class="tile-label">Author</span>
+          <strong>作家で探す</strong>
+          <small>シリーズも発売日順に</small>
+        </div>
+        <div class="book-tile tile-red">
+          <span class="tile-label">Synopsis</span>
+          <strong>あらすじ検索</strong>
+          <small>複数語はAND検索</small>
+        </div>
+        <div class="book-tile tile-green">
+          <span class="tile-label">Filter</span>
+          <strong>ジャンル絞り込み</strong>
+          <small>児童書・文庫も整理</small>
+        </div>
+      </section>
     </div>
   </div>
 
   <div class="pagination hidden" id="pagination"></div>
 </main>
 
-<footer class="site-version">ver.15</footer>
+<footer class="site-version">ver.16</footer>
 
 <script src="app.js"></script>
 </body>

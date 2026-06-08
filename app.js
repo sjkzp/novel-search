@@ -118,6 +118,15 @@ pagination.addEventListener("click", event => {
 updateSearchPlaceholder();
 
 content.addEventListener("click", event => {
+  const quickSearch = event.target.closest(".quick-search");
+  if (quickSearch) {
+    searchMode.value = quickSearch.dataset.mode || "author";
+    searchInput.value = quickSearch.dataset.query || "";
+    updateSearchPlaceholder();
+    doSearch();
+    return;
+  }
+
   const authorLink = event.target.closest(".author-link");
   if (authorLink) {
     searchMode.value = "author";
