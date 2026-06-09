@@ -563,6 +563,61 @@
     text-align: right;
   }
 
+  .site-version a {
+    color: var(--muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .policy-page {
+    max-width: 860px;
+  }
+
+  .policy-content {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 34px;
+    line-height: 1.9;
+  }
+
+  .policy-content h1,
+  .policy-content h2 {
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    line-height: 1.4;
+  }
+
+  .policy-content h1 {
+    margin-bottom: 22px;
+    font-size: 2rem;
+  }
+
+  .policy-content h2 {
+    margin-top: 28px;
+    margin-bottom: 10px;
+    font-size: 1.15rem;
+  }
+
+  .policy-content p,
+  .policy-content li {
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    color: #241b14;
+  }
+
+  .policy-content ul {
+    margin-left: 1.3em;
+  }
+
+  .policy-content a {
+    color: var(--accent);
+  }
+
+  .policy-updated {
+    margin-top: 30px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
   .pagination {
     display: flex;
     justify-content: center;
