@@ -485,6 +485,7 @@ const statusAuthor = document.getElementById("statusAuthor");
 const statusCount = document.getElementById("statusCount");
 const sortSelect = document.getElementById("sortSelect");
 const genreFilter = document.getElementById("genreFilter");
+const topPagination = document.getElementById("topPagination");
 const pagination = document.getElementById("pagination");
 const apiNote = document.getElementById("apiNote");
 
@@ -524,7 +525,10 @@ genreFilter.addEventListener("change", event => {
   });
 });
 
-pagination.addEventListener("click", event => {
+topPagination?.addEventListener("click", handlePaginationClick);
+pagination.addEventListener("click", handlePaginationClick);
+
+function handlePaginationClick(event) {
   const button = event.target.closest(".page-btn");
   if (!button || button.disabled) return;
 
@@ -532,7 +536,7 @@ pagination.addEventListener("click", event => {
   if (!page || page === currentPage) return;
 
   goToPage(page);
-});
+}
 
 updateSearchPlaceholder();
 setupQuickSearches();
@@ -746,7 +750,7 @@ async function fetchRakuten(author, page = 1) {
     books: normalizeRakutenItems(data),
     page: Number(data.page || page),
     pageCount: Number(data.pageCount || 1),
-    totalCount: getTotalCount(data)
+    totalCount: Number(data.count || 0)
   };
 }
 
@@ -782,22 +786,8 @@ async function fetchRakutenByKeyword(keyword, page = 1) {
     books,
     page: Number(data.page || page),
     pageCount: Number(data.pageCount || 1),
-    totalCount: getTotalCount(data) || books.length
+    totalCount: Number(data.count || books.length)
   };
-}
-
-function getTotalCount(data) {
-  const total = Number(data?.hits || data?.totalCount || data?.total || 0);
-  if (total > 0) return total;
-
-  const pageCount = Number(data?.pageCount || 0);
-  const page = Number(data?.page || 1);
-  const count = Number(data?.count || 0);
-  if (pageCount > 1 && count > 0) {
-    return page < pageCount ? pageCount * ITEMS_PER_PAGE : (page - 1) * ITEMS_PER_PAGE + count;
-  }
-
-  return count;
 }
 
 function normalizeRakutenItems(data) {
@@ -949,7 +939,7 @@ function render(query, books, mode = "author", meta = {}) {
     ? `<div class="grid">${cards}</div>`
     : `<div class="state-box"><span class="icon">?</span><p>選択中のジャンルに該当する作品がありません。</p></div>`;
   revealOverflowingSynopsisToggles();
-  renderPagination(isGenreFilteringActive() ? 1 : currentPageCount);
+  renderPagination();
 }
 
 function getPageStart(page, itemCount) {
@@ -962,45 +952,34 @@ function getPageEnd(page, itemCount) {
 }
 
 function updateStatusCount(pageItemCount, visibleItemCount) {
-  if (pageItemCount === 0) {
-    statusCount.textContent = "";
-    return;
-  }
-
-  const rangeText = currentTotalCount > 0
-    ? `${currentTotalCount}件中 ${getPageStart(currentPage, pageItemCount)}-${getPageEnd(currentPage, pageItemCount)}件`
-    : `${pageItemCount}件`;
-
-  if (visibleItemCount === pageItemCount) {
-    statusCount.textContent = rangeText;
-    return;
-  }
-
-  statusCount.textContent = visibleItemCount > 0
-    ? `${visibleItemCount}件中 1-${visibleItemCount}件`
-    : "0件";
+  statusCount.textContent = "";
 }
 
-function renderPagination(pageCount = currentPageCount) {
-  if (pageCount <= 1) {
-    pagination.classList.add("hidden");
-    pagination.innerHTML = "";
+function renderPagination() {
+  if (currentPageCount <= 1) {
+    setPaginationHtml("");
     return;
   }
 
-  const safeCurrentPage = Math.min(currentPage, pageCount);
-  const pages = getVisiblePages(safeCurrentPage, pageCount);
+  const pages = getVisiblePages(currentPage, currentPageCount);
   const pageButtons = pages.map(page => {
     if (page === "...") return `<span class="page-ellipsis">...</span>`;
-    return `<button class="page-btn${page === safeCurrentPage ? " active" : ""}" type="button" data-page="${page}" ${page === safeCurrentPage ? "disabled" : ""}>${page}</button>`;
+    return `<button class="page-btn${page === currentPage ? " active" : ""}" type="button" data-page="${page}" ${page === currentPage ? "disabled" : ""}>${page}</button>`;
   }).join("");
 
-  pagination.innerHTML = `
-    <button class="page-btn" type="button" data-page="${safeCurrentPage - 1}" ${safeCurrentPage <= 1 ? "disabled" : ""}>前へ</button>
+  setPaginationHtml(`
+    <button class="page-btn" type="button" data-page="${currentPage - 1}" ${currentPage <= 1 ? "disabled" : ""}>前へ</button>
     ${pageButtons}
-    <button class="page-btn" type="button" data-page="${safeCurrentPage + 1}" ${safeCurrentPage >= pageCount ? "disabled" : ""}>次へ</button>
-  `;
-  pagination.classList.remove("hidden");
+    <button class="page-btn" type="button" data-page="${currentPage + 1}" ${currentPage >= currentPageCount ? "disabled" : ""}>次へ</button>
+  `);
+}
+
+function setPaginationHtml(html) {
+  [topPagination, pagination].forEach(element => {
+    if (!element) return;
+    element.innerHTML = html;
+    element.classList.toggle("hidden", !html);
+  });
 }
 
 function getVisiblePages(page, pageCount) {
@@ -1057,12 +1036,6 @@ function filterBooksByGenre(books) {
     const genre = getBookGenre(book);
     return !currentGenreSelection || currentGenreSelection.has(genre.key);
   });
-}
-
-function isGenreFilteringActive() {
-  const checkboxes = [...genreFilter.querySelectorAll(".genre-checkbox")];
-  if (checkboxes.length === 0) return false;
-  return checkboxes.some(input => !input.checked);
 }
 
 function shouldCheckGenreByDefault(genre) {
@@ -1139,8 +1112,7 @@ function getDateValue(value) {
 function showLoading() {
   document.body.classList.add("has-results");
   statusBar.classList.add("hidden");
-  pagination.classList.add("hidden");
-  pagination.innerHTML = "";
+  setPaginationHtml("");
   content.innerHTML = `
     <div class="state-box">
       <div class="loading-dots" style="margin-bottom:16px">
@@ -1153,8 +1125,7 @@ function showLoading() {
 function showError(message) {
   document.body.classList.add("has-results");
   statusBar.classList.add("hidden");
-  pagination.classList.add("hidden");
-  pagination.innerHTML = "";
+  setPaginationHtml("");
   content.innerHTML = `
     <div class="state-box">
       <span class="icon">!</span>

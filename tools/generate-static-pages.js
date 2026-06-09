@@ -140,6 +140,7 @@ function renderPage({ type, mode, query }) {
       <div class="genre-filter hidden" id="genreFilter"></div>
     </div>
   </div>
+  <div class="pagination pagination-top hidden" id="topPagination"></div>
   <div id="content">
     <section class="fixed-landing">
       <p class="hero-kicker">Novel Synopsis Finder</p>

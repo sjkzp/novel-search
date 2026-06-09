@@ -688,6 +688,11 @@
     margin-top: 28px;
   }
 
+  .pagination-top {
+    margin-top: 0;
+    margin-bottom: 20px;
+  }
+
   .page-btn {
     min-width: 36px;
     height: 36px;
