@@ -281,7 +281,7 @@
     color: var(--ink);
     cursor: pointer;
     font-family: "Zen Kaku Gothic New", sans-serif;
-    font-size: 0.88rem;
+    font-size: 0.94rem;
     font-weight: 700;
     transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.15s;
   }
@@ -421,9 +421,10 @@
   }
 
   .card-synopsis {
+    font-family: "Zen Kaku Gothic New", sans-serif;
     font-size: 0.88rem;
-    line-height: 1.75;
-    color: #3a2e22;
+    line-height: 1.85;
+    color: #241b14;
     flex: 1;
     display: -webkit-box;
     -webkit-line-clamp: 6;
