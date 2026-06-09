@@ -935,7 +935,7 @@ function render(query, books, mode = "author", meta = {}) {
     ? `<div class="grid">${cards}</div>`
     : `<div class="state-box"><span class="icon">?</span><p>選択中のジャンルに該当する作品がありません。</p></div>`;
   revealOverflowingSynopsisToggles();
-  renderPagination();
+  renderPagination(isGenreFilteringActive() ? 1 : currentPageCount);
 }
 
 function getPageStart(page, itemCount) {
@@ -967,23 +967,24 @@ function updateStatusCount(pageItemCount, visibleItemCount) {
     : "0件";
 }
 
-function renderPagination() {
-  if (currentPageCount <= 1) {
+function renderPagination(pageCount = currentPageCount) {
+  if (pageCount <= 1) {
     pagination.classList.add("hidden");
     pagination.innerHTML = "";
     return;
   }
 
-  const pages = getVisiblePages(currentPage, currentPageCount);
+  const safeCurrentPage = Math.min(currentPage, pageCount);
+  const pages = getVisiblePages(safeCurrentPage, pageCount);
   const pageButtons = pages.map(page => {
     if (page === "...") return `<span class="page-ellipsis">...</span>`;
-    return `<button class="page-btn${page === currentPage ? " active" : ""}" type="button" data-page="${page}" ${page === currentPage ? "disabled" : ""}>${page}</button>`;
+    return `<button class="page-btn${page === safeCurrentPage ? " active" : ""}" type="button" data-page="${page}" ${page === safeCurrentPage ? "disabled" : ""}>${page}</button>`;
   }).join("");
 
   pagination.innerHTML = `
-    <button class="page-btn" type="button" data-page="${currentPage - 1}" ${currentPage <= 1 ? "disabled" : ""}>前へ</button>
+    <button class="page-btn" type="button" data-page="${safeCurrentPage - 1}" ${safeCurrentPage <= 1 ? "disabled" : ""}>前へ</button>
     ${pageButtons}
-    <button class="page-btn" type="button" data-page="${currentPage + 1}" ${currentPage >= currentPageCount ? "disabled" : ""}>次へ</button>
+    <button class="page-btn" type="button" data-page="${safeCurrentPage + 1}" ${safeCurrentPage >= pageCount ? "disabled" : ""}>次へ</button>
   `;
   pagination.classList.remove("hidden");
 }
@@ -1042,6 +1043,12 @@ function filterBooksByGenre(books) {
     const genre = getBookGenre(book);
     return !currentGenreSelection || currentGenreSelection.has(genre.key);
   });
+}
+
+function isGenreFilteringActive() {
+  const checkboxes = [...genreFilter.querySelectorAll(".genre-checkbox")];
+  if (checkboxes.length === 0) return false;
+  return checkboxes.some(input => !input.checked);
 }
 
 function shouldCheckGenreByDefault(genre) {
