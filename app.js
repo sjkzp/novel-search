@@ -1,5 +1,62 @@
 ﻿const API_BASE_URL = "https://rakuten-books-proxy.cgm4s70.workers.dev";
 
+const STATIC_PAGE_AUTHORS = [
+  "東野圭吾",
+  "村上春樹",
+  "宮部みゆき",
+  "辻村深月",
+  "湊かなえ",
+  "伊坂幸太郎",
+  "恩田陸",
+  "森見登美彦",
+  "有川ひろ",
+  "住野よる",
+  "青山美智子",
+  "原田マハ",
+  "凪良ゆう",
+  "町田そのこ",
+  "瀬尾まいこ",
+  "小川糸",
+  "朝井リョウ",
+  "米澤穂信",
+  "知念実希人",
+  "西尾維新"
+];
+
+const STATIC_PAGE_KEYWORDS = [
+  "ミステリー",
+  "青春",
+  "恋愛",
+  "猫",
+  "探偵",
+  "家族",
+  "友情",
+  "学校",
+  "仕事",
+  "結婚",
+  "卒業",
+  "一人暮らし",
+  "医療",
+  "料理",
+  "カレー",
+  "パン",
+  "ゲーム",
+  "おしゃれ",
+  "優しい",
+  "旅"
+];
+
+const STATIC_PICKUP_PAGES = [
+  ...STATIC_PAGE_AUTHORS.map(author => ({
+    href: `./author/${author}.html`,
+    label: `${author}のあらすじ一覧`
+  })),
+  ...STATIC_PAGE_KEYWORDS.map(keyword => ({
+    href: `./keyword/${keyword}.html`,
+    label: `${keyword}小説のあらすじ`
+  }))
+];
+
 const DEMO_DATA = {
   "東野圭吾": [
     {
@@ -480,6 +537,7 @@ pagination.addEventListener("click", event => {
 
 updateSearchPlaceholder();
 setupQuickSearches();
+setupPickupPages();
 
 content.addEventListener("click", event => {
   const refresh = event.target.closest(".quick-refresh");
@@ -553,6 +611,15 @@ function refreshQuickSearchGroup(mode) {
   if (mode === "synopsis") {
     setQuickSearchGroup("synopsis", pickRandomItems(FEATURED_KEYWORDS, 3));
   }
+}
+
+function setupPickupPages() {
+  const pickupPages = document.getElementById("pickupPages");
+  if (!pickupPages) return;
+
+  pickupPages.innerHTML = pickRandomItems(STATIC_PICKUP_PAGES, 3)
+    .map(page => `<a href="${escAttr(page.href)}">${escHtml(page.label)}</a>`)
+    .join("");
 }
 
 function setQuickSearchGroup(mode, queries) {
