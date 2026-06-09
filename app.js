@@ -932,17 +932,19 @@ function renderGenreFilter(books) {
       const genre = getBookGenre(book);
       return [genre.key, genre];
     })
-  ).values()];
+  ).values()].filter(genre => shouldShowGenreOption(genre));
 
   if (genres.length <= 1) {
     genreFilter.classList.add("hidden");
     genreFilter.innerHTML = "";
-    currentGenreSelection = null;
+    currentGenreSelection = genres.length === 1 ? new Set([genres[0].key]) : null;
     return;
   }
 
   if (!currentGenreSelection) {
     currentGenreSelection = new Set(genres.map(genre => genre.key));
+  } else {
+    currentGenreSelection = new Set([...currentGenreSelection].filter(key => genres.some(genre => genre.key === key)));
   }
 
   genreFilter.innerHTML = `
@@ -958,8 +960,19 @@ function renderGenreFilter(books) {
 }
 
 function filterBooksByGenre(books) {
-  if (!currentGenreSelection) return books;
-  return books.filter(book => currentGenreSelection.has(getBookGenre(book).key));
+  return books.filter(book => {
+    const genre = getBookGenre(book);
+    if (!shouldShowGenreOption(genre)) return false;
+    return !currentGenreSelection || currentGenreSelection.has(genre.key);
+  });
+}
+
+function shouldShowGenreOption(genre) {
+  return !isStaticSearchPage() || genre.key !== "other";
+}
+
+function isStaticSearchPage() {
+  return Boolean(document.body.dataset.autoSearchMode && document.body.dataset.autoSearchQuery);
 }
 
 function getBookGenre(book) {
