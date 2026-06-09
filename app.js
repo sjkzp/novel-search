@@ -957,9 +957,14 @@ function updateStatusCount(pageItemCount, visibleItemCount) {
     ? `${currentTotalCount}件中 ${getPageStart(currentPage, pageItemCount)}-${getPageEnd(currentPage, pageItemCount)}件`
     : `${pageItemCount}件`;
 
-  statusCount.textContent = visibleItemCount === pageItemCount
-    ? rangeText
-    : `${rangeText} / 表示 ${visibleItemCount}件`;
+  if (visibleItemCount === pageItemCount) {
+    statusCount.textContent = rangeText;
+    return;
+  }
+
+  statusCount.textContent = visibleItemCount > 0
+    ? `${visibleItemCount}件中 1-${visibleItemCount}件`
+    : "0件";
 }
 
 function renderPagination() {
