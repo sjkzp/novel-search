@@ -1001,7 +1001,7 @@ function renderGenreFilter(books) {
       const genre = getBookGenre(book);
       return [genre.key, genre];
     })
-  ).values()];
+  ).values()].sort(compareGenres);
 
   if (genres.length <= 1) {
     genreFilter.classList.add("hidden");
@@ -1040,11 +1040,14 @@ function filterBooksByGenre(books) {
 }
 
 function shouldCheckGenreByDefault(genre) {
-  return !isStaticSearchPage() || genre.key !== "other";
+  return genre.key !== "other";
 }
 
-function isStaticSearchPage() {
-  return Boolean(document.body.dataset.autoSearchMode && document.body.dataset.autoSearchQuery);
+function compareGenres(a, b) {
+  const order = ["novel", "paperback", "children", "other"];
+  const indexA = order.includes(a.key) ? order.indexOf(a.key) : order.length;
+  const indexB = order.includes(b.key) ? order.indexOf(b.key) : order.length;
+  return indexA - indexB || a.label.localeCompare(b.label, "ja");
 }
 
 function getBookGenre(book) {
@@ -1056,10 +1059,6 @@ function getBookGenre(book) {
     return { key: "novel", label: "小説・エッセイ" };
   }
 
-  if (id.startsWith("001017") || /ライトノベル|ラノベ/.test(text)) {
-    return { key: "light-novel", label: "ライトノベル" };
-  }
-
   if (id.startsWith("001003") || /児童|絵本|こども|子ども/.test(text)) {
     return { key: "children", label: "児童書・絵本" };
   }
@@ -1068,11 +1067,7 @@ function getBookGenre(book) {
     return { key: "paperback", label: "文庫" };
   }
 
-  if (/漫画|コミック/.test(text)) {
-    return { key: "comic", label: "コミック" };
-  }
-
-  return { key: "other", label: name || "その他" };
+  return { key: "other", label: "その他" };
 }
 
 function renderAuthorLinks(author) {
