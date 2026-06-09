@@ -906,7 +906,7 @@ function render(query, books, mode = "author", meta = {}) {
 
   const filteredBooks = filterBooksByGenre(books);
   updateStatusCount(books.length, filteredBooks.length);
-  const sortedBooks = sortBooksByDate(filteredBooks, sortSelect.value);
+  const sortedBooks = sortBooks(filteredBooks, sortSelect.value);
   const cards = sortedBooks.map((book, index) => `
     <div class="card" style="animation-delay:${index * 0.04}s">
       ${book.image
@@ -1083,6 +1083,11 @@ function renderAuthorLinks(author) {
   return parts
     .map(part => `<button class="author-link" type="button" data-author="${escAttr(part)}">${escHtml(part)}</button>`)
     .join(" / ");
+}
+
+function sortBooks(books, order) {
+  if (order === "popular") return [...books];
+  return sortBooksByDate(books, order);
 }
 
 function sortBooksByDate(books, order) {
