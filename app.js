@@ -517,10 +517,26 @@ content.addEventListener("click", event => {
   toggle.textContent = expanded ? "すべてを表示" : "閉じる";
 });
 
+runAutoSearchFromPage();
+
 function updateSearchPlaceholder() {
   searchInput.placeholder = searchMode.value === "synopsis"
     ? "あらすじのキーワードを入力"
     : "作家名を入力";
+}
+
+function runAutoSearchFromPage() {
+  const params = new URLSearchParams(window.location.search);
+  const mode = document.body.dataset.autoSearchMode || params.get("mode");
+  const query = document.body.dataset.autoSearchQuery || params.get("q");
+
+  if (!mode || !query) return;
+  if (!["author", "synopsis"].includes(mode)) return;
+
+  searchMode.value = mode;
+  searchInput.value = query;
+  updateSearchPlaceholder();
+  doSearch();
 }
 
 function setupQuickSearches() {
