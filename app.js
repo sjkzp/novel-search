@@ -1044,7 +1044,7 @@ function shouldCheckGenreByDefault(genre) {
 }
 
 function compareGenres(a, b) {
-  const order = ["novel", "paperback", "children", "other"];
+  const order = ["novel", "paperback", "children", "light-novel", "other"];
   const indexA = order.includes(a.key) ? order.indexOf(a.key) : order.length;
   const indexB = order.includes(b.key) ? order.indexOf(b.key) : order.length;
   return indexA - indexB || a.label.localeCompare(b.label, "ja");
@@ -1061,6 +1061,10 @@ function getBookGenre(book) {
 
   if (id.startsWith("001003") || /児童|絵本|こども|子ども/.test(text)) {
     return { key: "children", label: "児童書・絵本" };
+  }
+
+  if (id.startsWith("001017") || /ライトノベル|ラノベ/.test(text)) {
+    return { key: "light-novel", label: "ライトノベル" };
   }
 
   if (id.startsWith("001019") || /文庫/.test(text)) {
