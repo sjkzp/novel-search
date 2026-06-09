@@ -746,7 +746,7 @@ async function fetchRakuten(author, page = 1) {
     books: normalizeRakutenItems(data),
     page: Number(data.page || page),
     pageCount: Number(data.pageCount || 1),
-    totalCount: Number(data.count || 0)
+    totalCount: getTotalCount(data)
   };
 }
 
@@ -782,8 +782,22 @@ async function fetchRakutenByKeyword(keyword, page = 1) {
     books,
     page: Number(data.page || page),
     pageCount: Number(data.pageCount || 1),
-    totalCount: Number(data.count || books.length)
+    totalCount: getTotalCount(data) || books.length
   };
+}
+
+function getTotalCount(data) {
+  const total = Number(data?.hits || data?.totalCount || data?.total || 0);
+  if (total > 0) return total;
+
+  const pageCount = Number(data?.pageCount || 0);
+  const page = Number(data?.page || 1);
+  const count = Number(data?.count || 0);
+  if (pageCount > 1 && count > 0) {
+    return page < pageCount ? pageCount * ITEMS_PER_PAGE : (page - 1) * ITEMS_PER_PAGE + count;
+  }
+
+  return count;
 }
 
 function normalizeRakutenItems(data) {
