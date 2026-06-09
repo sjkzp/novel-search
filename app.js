@@ -46,16 +46,15 @@ const STATIC_PAGE_KEYWORDS = [
   "旅"
 ];
 
-const STATIC_PICKUP_PAGES = [
-  ...STATIC_PAGE_AUTHORS.map(author => ({
-    href: `./author/${author}.html`,
-    label: `${author}のあらすじ一覧`
-  })),
-  ...STATIC_PAGE_KEYWORDS.map(keyword => ({
-    href: `./keyword/${keyword}.html`,
-    label: `${keyword}小説のあらすじ`
-  }))
-];
+const STATIC_AUTHOR_PAGES = STATIC_PAGE_AUTHORS.map(author => ({
+  href: `./author/${author}.html`,
+  label: `${author}のあらすじ一覧`
+}));
+
+const STATIC_KEYWORD_PAGES = STATIC_PAGE_KEYWORDS.map(keyword => ({
+  href: `./keyword/${keyword}.html`,
+  label: `${keyword}小説のあらすじ`
+}));
 
 const DEMO_DATA = {
   "東野圭吾": [
@@ -617,7 +616,10 @@ function setupPickupPages() {
   const pickupPages = document.getElementById("pickupPages");
   if (!pickupPages) return;
 
-  pickupPages.innerHTML = pickRandomItems(STATIC_PICKUP_PAGES, 3)
+  pickupPages.innerHTML = [
+    ...pickRandomItems(STATIC_AUTHOR_PAGES, 3),
+    ...pickRandomItems(STATIC_KEYWORD_PAGES, 3)
+  ]
     .map(page => `<a href="${escAttr(page.href)}">${escHtml(page.label)}</a>`)
     .join("");
 }
